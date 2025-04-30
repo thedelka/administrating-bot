@@ -1,0 +1,39 @@
+import pickle
+import sqlite3
+import os
+from User.user import User
+
+db_path = os.path.join(os.path.dirname(__file__), "users_data.db")
+connection = sqlite3.connect(db_path)
+cursor = connection.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users_data (
+user_id INTEGER NOT NULL,
+user BLOB
+)""")
+
+connection.commit()
+
+def add_user(user : User):
+    cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
+    user_id_value = cursor.fetchone()
+
+    if user_id_value is None:
+        cursor.execute("INSERT INTO users_data (user_id, user) VALUES (?, ?)", (user.user_id, pickle.dumps(user)))
+        connection.commit()
+
+def get_user(user_id):
+    cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
+    user_data = cursor.fetchone()
+
+    if user_data is not None:
+        binary_data = user_data[0]
+        user = pickle.loads(binary_data)
+
+        return user
+    else:
+        print("---ОШИБКА: такой пользователь не найден---")
+        return None
+
+connection.commit()
