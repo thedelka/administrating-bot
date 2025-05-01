@@ -3,7 +3,7 @@ import pytz
 from User.users_data_db import  get_user, add_message_to_history
 from aiogram.types import Message
 from aiogram import  Router, Bot
-from Jsons.jsons_creator import get_admins_ids_list
+from Admin.get_admin_info import get_admins_ids_list
 
 router = Router()
 
