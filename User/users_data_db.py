@@ -1,6 +1,9 @@
 import pickle
 import sqlite3
 import os
+from idlelib.colorizer import prog_group_name_to_tag
+
+from Entities.dialogue import Dialogue
 from Entities.user import User
 
 db_path = os.path.join(os.path.dirname(__file__), "users_data.db")
@@ -35,5 +38,21 @@ def get_user(user_id):
     except None:
         print("ТАКОЙ ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН")
         return None
+
+def add_dialogue(user_id, dialogue : Dialogue):
+    cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
+    user_data = cursor.fetchone()
+
+    try:
+        binary = user_data[0]
+        user : User = pickle.loads(binary)
+
+        dialogues = user.user_dialogues
+        dialogues.append(dialogue)
+
+        setattr(user, "user_dialogues", dialogues)
+
+    except None:
+        print("NO USER WITH THIS ID")
 
 connection.commit()
