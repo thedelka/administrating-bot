@@ -1,9 +1,6 @@
 import pickle
 import sqlite3
 import os
-from idlelib.colorizer import prog_group_name_to_tag
-
-from Entities.dialogue import Dialogue
 from Entities.user import User
 
 db_path = os.path.join(os.path.dirname(__file__), "users_data.db")
@@ -34,12 +31,14 @@ def get_user(user_id):
     try:
         binary_data = user_data[0]
         user = pickle.loads(binary_data)
+
         return user
-    except None:
-        print("ТАКОЙ ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН")
+
+    except None as e:
+        print(e)
         return None
 
-def add_dialogue(user_id, dialogue : Dialogue):
+def add_message_to_history(user_id, new_message):
     cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
     user_data = cursor.fetchone()
 
@@ -47,12 +46,18 @@ def add_dialogue(user_id, dialogue : Dialogue):
         binary = user_data[0]
         user : User = pickle.loads(binary)
 
-        dialogues = user.user_dialogues
-        dialogues.append(dialogue)
+        messages = user.user_message_history
+        messages.append(new_message)
 
-        setattr(user, "user_dialogues", dialogues)
+        setattr(user, "user_message_history", messages)
 
-    except None:
-        print("NO USER WITH THIS ID")
+        cursor.execute("UPDATE users_data set user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
+        connection.commit()
+
+    except (TypeError, IndexError) as e:
+        print(f"Ошибка при обновлении истории сообщений пользователя: {e}")
+
+    except Exception as e:
+        print(f"Произошла другая ошибка: {e}")
 
 connection.commit()
