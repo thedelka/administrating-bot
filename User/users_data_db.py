@@ -46,10 +46,9 @@ def add_message_to_history(user_id, new_message):
         binary = user_data[0]
         user : User = pickle.loads(binary)
 
-        messages = user.user_message_history
-        messages.append(new_message)
+        user.user_message_history.append(new_message)
 
-        setattr(user, "user_message_history", messages)
+        setattr(user, "user_message_history", user.user_message_history)
 
         cursor.execute("UPDATE users_data set user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
         connection.commit()
