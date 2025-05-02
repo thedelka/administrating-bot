@@ -14,8 +14,8 @@ router = Router()
 @router.message(Command("start"))
 async def start_command(message : Message):
 
-    start_text = json.loads(get_config("START_MESSAGE", 'start_text'))
-    help_user_text = json.loads(get_config("START_MESSAGE", 'help_user_text'))
+    start_text = json.loads(get_config("MESSAGES", 'start_text'))
+    help_user_text = json.loads(get_config("MESSAGES", 'help_user_text'))
 
     user = User(message.from_user.id, message.from_user.username)
     add_user(user)

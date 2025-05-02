@@ -1,7 +1,9 @@
 from typing import Optional
 class User:
 
-    def __init__(self, user_id, user_name, message_history : Optional[list] = None):
+    def __init__(self, user_id, user_name,
+                 message_history : Optional[list] = None):
+
         if message_history is None:
             message_history = []
 
