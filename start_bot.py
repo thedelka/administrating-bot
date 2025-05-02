@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from Handlers.commands_handler import router as commands_handler_router
 from Handlers.menu_handler import router as menu_handler_router
 from Handlers.start_dialogue_handler import router as start_dialogue_handler_router
-from Handlers.dialogue_handler import router as dialogue_handler_router
+from Handlers.admin_dialogue_handler import router as dialogue_handler_router
 
 
 TOKEN = get_config('BOT_CONSTANTS', 'TOKEN')

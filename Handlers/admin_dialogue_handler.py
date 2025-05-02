@@ -1,0 +1,75 @@
+import json
+from sys import orig_argv
+
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from Admin.get_admin_info import get_admin
+from Settings.get_config import get_config
+from aiogram.types import Message, CallbackQuery
+from States.admin_state import AdminState
+from aiogram import Router, Bot, F
+from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
+from User.users_data_db import get_user
+
+router = Router()
+
+
+@router.callback_query(F.data.startswith("ANSWER"))
+async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bot):
+    user_id = callback.data.split("_")[-1]
+
+    operator_found_text = json.loads(get_config("MESSAGES", "found_not_taken_admin_text")) #сделать так чтобы это писалось только в первый раз нажатия
+
+    await bot.send_message(user_id, operator_found_text)
+
+    get_admin(callback.from_user.id).texting_user_id.append(user_id)
+
+    await state.set_state(AdminState.texting)
+    await state.set_data({"current_user_id" : user_id})
+
+    print(get_admin(callback.from_user.id).texting_user_id)
+
+
+@router.message(StateFilter(AdminState.texting))
+async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
+
+    data = await state.get_data()
+    current_user_id = data["current_user_id"]
+
+    await bot.send_message(current_user_id, message.text)
+
+
+@router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
+async def get_dialogue_history(callback : CallbackQuery):
+    user_id = callback.data.split("_")[-1]
+
+    message_history = get_user(user_id).user_message_history
+
+    await callback.message.answer("🗄Архивные сообщения🗄")
+    for message in message_history:
+        await callback.message.answer(message)
+
+    await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
+
+
+
+@router.callback_query(F.data.startswith("REMOVE_HISTORY"))
+async def remove_dialogue_history(callback : CallbackQuery, bot : Bot):
+    user_id = callback.data.split("_")[-1]
+
+    await callback.message.delete()
+
+@router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
+async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
+    user_id = callback.data.split("_")[-1]
+
+    close_dialogue_text = json.loads(get_config("MESSAGES", "close_dialogue_text"))
+
+    await bot.send_message(user_id, close_dialogue_text)
+
+    get_admin(callback.from_user.id).texting_user_id.remove(user_id)
+    await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+
+    print(get_admin(callback.from_user.id).texting_user_id)
+
+
