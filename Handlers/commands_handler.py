@@ -22,5 +22,4 @@ async def start_command(message : Message):
 
     await message.answer(text=start_text, reply_markup=menu_pages_builders[0])
 
-    await asyncio.sleep(10)
     await message.answer(f"{help_user_text}")
