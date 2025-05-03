@@ -1,6 +1,4 @@
 import json
-from sys import orig_argv
-
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from Admin.get_admin_info import get_admin
@@ -40,24 +38,33 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 
 
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
-async def get_dialogue_history(callback : CallbackQuery):
+async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
     user_id = callback.data.split("_")[-1]
 
+    archive_messages = []
     message_history = get_user(user_id).user_message_history
 
-    await callback.message.answer("🗄Архивные сообщения🗄")
+    archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
+    archive_messages.append(archive_messes_text.message_id)
+
     for message in message_history:
-        await callback.message.answer(message)
+        sent_message = await callback.message.answer(message)
+
+        archive_messages.append(sent_message.message_id)
 
     await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
 
+    await state.set_data({"temp_mess_history": archive_messages})
 
 
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
-async def remove_dialogue_history(callback : CallbackQuery, bot : Bot):
-    user_id = callback.data.split("_")[-1]
+async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
+    data = await state.get_data()
+    archive_messages = data["temp_mess_history"]
 
     await callback.message.delete()
+    await bot.delete_messages(callback.from_user.id, archive_messages)
+
 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
 async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):

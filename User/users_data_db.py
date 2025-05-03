@@ -34,8 +34,8 @@ def get_user(user_id):
 
         return user
 
-    except None as e:
-        print(e)
+    except Exception as e:
+        print(f"Произошла ошибка! {e}")
         return None
 
 def add_message_to_history(user_id, new_message):
