@@ -41,6 +41,8 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
     user_id = callback.data.split("_")[-1]
 
+    await callback.answer()
+
     archive_messages = []
     message_history = get_user(user_id).user_message_history
 
@@ -76,6 +78,8 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
 
     get_admin(callback.from_user.id).texting_user_id.remove(user_id)
     await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+
+    await state.clear()
 
     print(get_admin(callback.from_user.id).texting_user_id)
 
