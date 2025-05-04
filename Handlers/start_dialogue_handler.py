@@ -5,7 +5,7 @@ from Settings.get_config import get_config
 from User.users_data_db import  db_manager
 from aiogram.types import Message
 from aiogram.filters import StateFilter
-from aiogram import Router, Bot, F
+from aiogram import Router, Bot
 from Entities.admin import get_admins_ids_list
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
@@ -25,20 +25,17 @@ async def send_message_according_to_type(admin_id, bot : Bot, message : Message,
     for message_type, send_method in types_dict.items():
         if message_type:
             send_method(bot, admin_id)
-            db_manager.add_message_to_history(user_id, message_type)
+            db_manager.update_user_message_history(user_id, message_type)
 
 
 async def send_type_message(message: Message, bot : Bot):
     """Send user message to an admin"""
-
-
 
     tz = timezone(json.loads(get_config("BOT_CONSTANTS", "timezone")))
 
     time_now = datetime.datetime.now(tz).strftime("%H:%M:%S")
 
     user_id = message.from_user.id
-
 
     for admin_id in get_admins_ids_list():
         await bot.send_message(admin_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "

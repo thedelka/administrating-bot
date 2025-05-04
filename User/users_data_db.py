@@ -1,8 +1,6 @@
 import pickle, sqlite3, os
 from typing import Optional
-
 from Entities.user import User
-
 
 class UserDatabaseManager:
 
@@ -29,7 +27,6 @@ class UserDatabaseManager:
             self.cursor.execute("INSERT INTO users_data (user_id, user) VALUES (?, ?)", (user.user_id, pickle.dumps(user)))
             self.connection.commit()
 
-
     def get_user(self, user_id : int) -> Optional[User]:
         self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
         user_data = self.cursor.fetchone()
@@ -44,39 +41,23 @@ class UserDatabaseManager:
             print(f"Произошла ошибка! {e}")
             return None
 
-    def add_message_to_history(self, user_id, new_message):
+    def update_user_message_history(self, user_id, new_message):
         self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
         user_data = self.cursor.fetchone()
 
         try:
-            binary = user_data[0]
-            user : User = pickle.loads(binary)
+            user : User = pickle.loads(user_data[0])
 
-            user.user_message_history.append(new_message)
+            if new_message is not None:
+                user.user_message_history.append(new_message)
+            else:
+                user.user_message_history = []  # Resets history if None
 
             setattr(user, "user_message_history", user.user_message_history)
 
             self.cursor.execute("UPDATE users_data SET user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
             self.connection.commit()
-
         except Exception as e:
             print(f"Произошла ошибка: {e}")
-
-    def clear_user_message_history(self, user_id)-> None:
-        self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
-        user_data = self.cursor.fetchone()
-
-        try:
-            user = pickle.loads(user_data[0])
-
-            setattr(user, "user_message_history", [])
-
-            self.cursor.execute("UPDATE users_data SET user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
-            self.connection.commit()
-
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
-
-
 
 db_manager = UserDatabaseManager()

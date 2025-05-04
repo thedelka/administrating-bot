@@ -6,7 +6,7 @@ from Entities.admin import get_admin, admins_list
 from Settings.get_config import get_config
 from aiogram.types import Message, CallbackQuery
 from States.admin_state import AdminState
-from aiogram import Router, Bot, F, Dispatcher
+from aiogram import Router, Bot, F
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
 from User.users_data_db import db_manager
 
@@ -76,7 +76,7 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     close_dialogue_text = json.loads(get_config("MESSAGES", "close_dialogue_text"))
 
     await bot.send_message(user_id, close_dialogue_text)
-    db_manager.clear_user_message_history(user_id)
+    db_manager.update_user_message_history(user_id, None)
 
     if user_id in [admin.admin_user_id for admin in admins_list]:
         get_admin(callback.from_user.id).texting_user_id.remove(user_id)
