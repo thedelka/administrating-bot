@@ -46,12 +46,12 @@ class UserDatabaseManager:
         user_data = self.cursor.fetchone()
 
         try:
-            user : User = pickle.loads(user_data[0])
+            user : User = pickle.loads(user_data[0]).user_message_history
 
-            if new_message is not None:
+            if new_message:
                 user.user_message_history.append(new_message)
             else:
-                user.user_message_history = []  # Resets history if None
+                user.user_message_history = []
 
             setattr(user, "user_message_history", user.user_message_history)
 

@@ -14,18 +14,18 @@ router = Router()
 
 async def send_message_according_to_type(admin_id, bot : Bot, message : Message, user_id):
     types_dict = {
-        message.text: (lambda b, a_i :  b.send_message(a_i, message.text)),
-        message.photo: (lambda b, a_i : b.send_photo(a_i, message.photo[-1].file_id)),
-        message.document: (lambda b, a_i : b.send_document(a_i, message.document.file_id)),
-        message.sticker: (lambda b, a_i : b.send_sticker(a_i, message.sticker.file_id)),
-        message.video: (lambda b, a_i : b.send_video(a_i, message.video.file_id)),
-        message.voice: (lambda b, a_i : b.send_voice(a_i, message.voice.file_id))
+        "text": (lambda b, a_i :  b.send_message(a_i, message.text)),
+        "photo": (lambda b, a_i : b.send_photo(a_i, message.photo[-1].file_id)),
+        "document": (lambda b, a_i : b.send_document(a_i, message.document.file_id)),
+        "sticker": (lambda b, a_i : b.send_sticker(a_i, message.sticker.file_id)),
+        "video": (lambda b, a_i : b.send_video(a_i, message.video.file_id)),
+        "voice": (lambda b, a_i : b.send_voice(a_i, message.voice.file_id))
     }
 
-    for message_type, send_method in types_dict.items():
-        if message_type:
-            send_method(bot, admin_id)
-            db_manager.update_user_message_history(user_id, message_type)
+    for attribute, send_method in types_dict.items():
+        if getattr(message, attribute, None):
+            await send_method(bot, admin_id)
+            db_manager.update_user_message_history(user_id, getattr(message, attribute))
 
 
 async def send_type_message(message: Message, bot : Bot):

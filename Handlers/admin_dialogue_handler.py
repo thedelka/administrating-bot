@@ -15,6 +15,8 @@ router = Router()
 
 @router.callback_query(F.data.startswith("ANSWER"))
 async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bot):
+    await callback.answer("Ваша переписка с пользователем начата!")
+
     user_id = callback.data.split("_")[-1]
 
     operator_found_text = json.loads(get_config("MESSAGES", "found_not_taken_admin_text")) #сделать так чтобы это писалось только в первый раз нажатия

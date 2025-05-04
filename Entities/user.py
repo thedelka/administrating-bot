@@ -1,6 +1,6 @@
 from typing import Optional
-class User:
 
+class User:
     def __init__(self, user_id, user_name,
                  message_history : Optional[list] = None):
 
