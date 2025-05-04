@@ -2,7 +2,7 @@ import json
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
-from Admin.get_admin_info import get_admin, admins_list
+from Entities.admin import get_admin, admins_list
 from Settings.get_config import get_config
 from aiogram.types import Message, CallbackQuery
 from States.admin_state import AdminState
@@ -76,6 +76,7 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     close_dialogue_text = json.loads(get_config("MESSAGES", "close_dialogue_text"))
 
     await bot.send_message(user_id, close_dialogue_text)
+    db_manager.clear_user_message_history(user_id)
 
     if user_id in [admin.admin_user_id for admin in admins_list]:
         get_admin(callback.from_user.id).texting_user_id.remove(user_id)
@@ -84,12 +85,11 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
 
 
     await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+
     await state.clear()
 
     storage = state.storage
-
     target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
-
     await storage.set_state(key=target_key, state = None)
 
     print(get_admin(callback.from_user.id).texting_user_id)

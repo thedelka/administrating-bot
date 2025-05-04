@@ -6,7 +6,7 @@ from User.users_data_db import  db_manager
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot, F
-from Admin.get_admin_info import get_admins_ids_list
+from Entities.admin import get_admins_ids_list
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 
@@ -61,6 +61,7 @@ async def send_user_message(message : Message, bot : Bot, state : FSMContext):
     await state.set_state(DialogueState.dialogue_open)
 
     print(f'Текуще состояние диалога у юзера: {await state.get_state()}')
+
 
 @router.message(StateFilter(DialogueState.dialogue_open))
 async def message_while_dialogue(message : Message, bot : Bot):

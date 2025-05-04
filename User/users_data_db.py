@@ -56,13 +56,27 @@ class UserDatabaseManager:
 
             setattr(user, "user_message_history", user.user_message_history)
 
-            self.cursor.execute("UPDATE users_data set user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
+            self.cursor.execute("UPDATE users_data SET user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
             self.connection.commit()
 
-        except (TypeError, IndexError) as e:
-            print(f"Ошибка при обновлении истории сообщений пользователя: {e}")
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+
+    def clear_user_message_history(self, user_id)-> None:
+        self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
+        user_data = self.cursor.fetchone()
+
+        try:
+            user = pickle.loads(user_data[0])
+
+            setattr(user, "user_message_history", [])
+
+            self.cursor.execute("UPDATE users_data SET user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
+            self.connection.commit()
 
         except Exception as e:
-            print(f"Произошла другая ошибка: {e}")
+            print(f"Произошла ошибка: {e}")
+
+
 
 db_manager = UserDatabaseManager()
