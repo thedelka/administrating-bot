@@ -1,13 +1,14 @@
 import json
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from Admin.get_admin_info import get_admin
+from aiogram.fsm.storage.base import StorageKey
+from Admin.get_admin_info import get_admin, admins_list
 from Settings.get_config import get_config
 from aiogram.types import Message, CallbackQuery
 from States.admin_state import AdminState
-from aiogram import Router, Bot, F
+from aiogram import Router, Bot, F, Dispatcher
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
-from User.users_data_db import get_user
+from User.users_data_db import db_manager
 
 router = Router()
 
@@ -44,7 +45,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
     await callback.answer()
 
     archive_messages = []
-    message_history = get_user(user_id).user_message_history
+    message_history = db_manager.get_user(user_id).user_message_history
 
     archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
     archive_messages.append(archive_messes_text.message_id)
@@ -76,11 +77,22 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
 
     await bot.send_message(user_id, close_dialogue_text)
 
-    get_admin(callback.from_user.id).texting_user_id.remove(user_id)
-    await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+    if user_id in [admin.admin_user_id for admin in admins_list]:
+        get_admin(callback.from_user.id).texting_user_id.remove(user_id)
+    else:
+        print("ТАКОГО ЮЗЕРА И ТАК НЕ БЫЛО!")
 
+
+    await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
     await state.clear()
 
+    storage = state.storage
+
+    target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
+
+    await storage.set_state(key=target_key, state = None)
+
     print(get_admin(callback.from_user.id).texting_user_id)
+    print(await storage.get_state(key=target_key))
 
 

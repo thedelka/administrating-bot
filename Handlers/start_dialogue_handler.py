@@ -1,11 +1,9 @@
-import datetime
-import json
-
+import datetime, json
 from aiogram.fsm.context import FSMContext
 from pytz import timezone
 from Settings.get_config import get_config
-from User.users_data_db import  get_user, add_message_to_history
-from aiogram.types import Message, CallbackQuery
+from User.users_data_db import  db_manager
+from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot, F
 from Admin.get_admin_info import get_admins_ids_list
@@ -27,7 +25,7 @@ async def send_message_according_to_type(admin_id, bot : Bot, message : Message,
     for message_type, send_method in types_dict.items():
         if message_type:
             send_method(bot, admin_id)
-            add_message_to_history(user_id, message_type)
+            db_manager.add_message_to_history(user_id, message_type)
 
 
 async def send_type_message(message: Message, bot : Bot):
@@ -49,7 +47,7 @@ async def send_type_message(message: Message, bot : Bot):
 
         await send_message_according_to_type(admin_id, bot, message, user_id)
 
-    print(get_user(user_id).user_message_history)
+    print(db_manager.get_user(user_id).user_message_history)
 
 
 @router.message(StateFilter(None))

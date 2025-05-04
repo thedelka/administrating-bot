@@ -1,5 +1,5 @@
 import json
-
+from aiogram.fsm.context import FSMContext
 from Keyboards.menu_keyboard import menu_buttons_texts
 from Keyboards.menu_keyboard import menu_pages_builders
 from Settings.get_config import get_config
@@ -17,15 +17,21 @@ async def send_menu_button_text(callback : CallbackQuery):
     await callback.message.answer(f"{menu_buttons[callback.data]}")
 
 @router.callback_query(F.data== ">>>")
-async def increase_page(callback : CallbackQuery):
+async def increase_page(callback : CallbackQuery, state: FSMContext):
     increase_current_menu_page()
 
+    await state.set_data({"current_menu_page" : get_current_menu_page()})
+    current_menu_page = dict(await state.get_data())["current_menu_page"]
+
     await callback.answer()
-    await callback.message.edit_reply_markup(reply_markup=menu_pages_builders[get_current_menu_page()-1])
+    await callback.message.edit_reply_markup(reply_markup=menu_pages_builders[current_menu_page-1])
 
 @router.callback_query(F.data == "<<<")
-async def decrease_page(callback : CallbackQuery, ):
+async def decrease_page(callback : CallbackQuery, state: FSMContext):
     decrease_current_menu_page()
 
+    await state.set_data({"current_menu_page" : get_current_menu_page()})
+    current_menu_page = dict(await state.get_data())["current_menu_page"]
+
     await callback.answer()
-    await callback.message.edit_reply_markup(reply_markup=menu_pages_builders[get_current_menu_page()-1])
+    await callback.message.edit_reply_markup(reply_markup=menu_pages_builders[current_menu_page-1])
