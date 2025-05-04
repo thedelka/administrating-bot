@@ -44,7 +44,7 @@ async def send_type_message(message: Message, bot : Bot):
 
         await send_message_according_to_type(admin_id, bot, message, user_id)
 
-    print(db_manager.get_user(user_id).user_message_history)
+    print(db_manager.get_user_attribute(user_id, "user_messages"))
 
 
 @router.message(StateFilter(None))

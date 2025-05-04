@@ -1,3 +1,4 @@
+import json
 import pickle, sqlite3, os
 from typing import Optional
 from Entities.user import User
@@ -14,50 +15,48 @@ class UserDatabaseManager:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS users_data (
         user_id INTEGER NOT NULL,
-        user BLOB
+        user_name TEXT NOT NULL,
+        user_messages TEXT
         )""")
 
         self.connection.commit()
 
     def add_user(self, user : User):
+        messages = user.user_message_history
+        json_data = json.dumps(messages, ensure_ascii=False)
+
         self.cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
         user_id_value = self.cursor.fetchone()
 
         if user_id_value is None:
-            self.cursor.execute("INSERT INTO users_data (user_id, user) VALUES (?, ?)", (user.user_id, pickle.dumps(user)))
+            self.cursor.execute("INSERT INTO users_data (user_id, user_name, user_messages) VALUES (?, ?, ?)",
+                                (user.user_id, user.user_name, json_data))
             self.connection.commit()
 
-    def get_user(self, user_id : int) -> Optional[User]:
-        self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
-        user_data = self.cursor.fetchone()
+    def get_user_attribute(self, user_id, attribute : str):
+        self.cursor.execute(f"SELECT {attribute} FROM users_data WHERE user_id = ?",
+                            (user_id,))
+        user_attribute_value = self.cursor.fetchone()
 
-        try:
-            binary_data = user_data[0]
-            user = pickle.loads(binary_data)
-
-            return user
-
-        except Exception as e:
-            print(f"Произошла ошибка! {e}")
-            return None
+        return user_attribute_value[0] if user_attribute_value is not None else None
 
     def update_user_message_history(self, user_id, new_message):
-        self.cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
+        self.cursor.execute("SELECT user_messages FROM users_data WHERE user_id = ?", (user_id,))
         user_data = self.cursor.fetchone()
 
         try:
-            user : User = pickle.loads(user_data[0]).user_message_history
+            messages : list = json.loads(user_data[0] if user_data else [])
 
             if new_message:
-                user.user_message_history.append(new_message)
+                messages.append(new_message)
             else:
-                user.user_message_history = []
+                messages = []
 
-            setattr(user, "user_message_history", user.user_message_history)
-
-            self.cursor.execute("UPDATE users_data SET user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
+            self.cursor.execute("UPDATE users_data SET user_messages = ? WHERE user_id = ?", (
+                json.dumps(messages, ensure_ascii=False), user_id
+            ))
             self.connection.commit()
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+        except json.JSONDecodeError as e:
+            print(f"Произошла ошибка из-за некорректного JSON: {e}")
 
 db_manager = UserDatabaseManager()
