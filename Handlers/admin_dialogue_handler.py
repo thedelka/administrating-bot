@@ -28,7 +28,7 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
 
-    print(get_admin(callback.from_user.id).texting_user_id)
+    print(f"Список обрабатывающихся админов пользователей: {get_admin(callback.from_user.id).texting_user_id}")
 
 
 @router.message(StateFilter(AdminState.texting))
@@ -43,23 +43,31 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
 async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
     user_id = callback.data.split("_")[-1]
-
     await callback.answer()
 
-    archive_messages = []
-    message_history = db_manager.get_user_attribute(user_id, "user_messages") #TODO: исправить ошибку что некорректно выводится история диалога
+    try:
 
-    archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
-    archive_messages.append(archive_messes_text.message_id)
+        message_history = db_manager.get_user_attribute(user_id, "user_messages")
 
-    for message in message_history:
-        sent_message = await callback.message.answer(message)
+        if isinstance(message_history, str):
+            message_history = json.loads(message_history)
+        elif not isinstance(message_history, list):
+            message_history = []
 
-        archive_messages.append(sent_message.message_id)
+        archive_messages = []
+        archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
+        archive_messages.append(archive_messes_text.message_id)
 
-    await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
+        for message in message_history:
+            if isinstance(message, str):
+                sent_message = await callback.message.answer(message)
+                archive_messages.append(sent_message.message_id)
 
-    await state.set_data({"temp_mess_history": archive_messages})
+        await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
+
+        await state.set_data({"temp_mess_history": archive_messages})
+    except Exception as e:
+        print(e)
 
 
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
@@ -94,7 +102,7 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
     await storage.set_state(key=target_key, state = None)
 
-    print(get_admin(callback.from_user.id).texting_user_id)
-    print(await storage.get_state(key=target_key))
+    print(f"Список обрабатывающихся админов пользователей: {get_admin(callback.from_user.id).texting_user_id}")
+    print(f"Состояние пользователя: {await storage.get_state(key=target_key)}")
 
 

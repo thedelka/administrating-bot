@@ -11,6 +11,7 @@ class UserDatabaseManager:
         self.cursor = self.connection.cursor()
         self._create_table()
 
+
     def _create_table(self) -> None:
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS users_data (
@@ -20,6 +21,7 @@ class UserDatabaseManager:
         )""")
 
         self.connection.commit()
+
 
     def add_user(self, user : User):
         messages = user.user_message_history
@@ -33,6 +35,7 @@ class UserDatabaseManager:
                                 (user.user_id, user.user_name, json_data))
             self.connection.commit()
 
+
     def get_user_attribute(self, user_id, attribute : str):
         self.cursor.execute(f"SELECT {attribute} FROM users_data WHERE user_id = ?",
                             (user_id,))
@@ -45,9 +48,12 @@ class UserDatabaseManager:
         user_data = self.cursor.fetchone()
 
         try:
-            messages : list = json.loads(user_data[0] if user_data else [])
+            messages = []
+            if user_data[0]:
+                messages = json.loads(user_data[0])
 
             if new_message:
+
                 messages.append(new_message)
             else:
                 messages = []
@@ -56,7 +62,9 @@ class UserDatabaseManager:
                 json.dumps(messages, ensure_ascii=False), user_id
             ))
             self.connection.commit()
+
         except json.JSONDecodeError as e:
             print(f"Произошла ошибка из-за некорректного JSON: {e}")
+
 
 db_manager = UserDatabaseManager()
