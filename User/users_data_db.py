@@ -24,6 +24,7 @@ class UserDatabaseManager:
 
 
     def _serialize_message(self, new_message : Message) -> dict:
+        """Transform message into dict with message information and return it"""
 
         message_data = {
             'message_id' : new_message.message_id,
@@ -59,6 +60,7 @@ class UserDatabaseManager:
 
 
     def get_user_messages(self, user_id):
+        """Get user messages history as list of every message information (list of dicts)"""
         self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
                             (user_id,))
         user_messages_value = self.cursor.fetchone()
@@ -70,7 +72,6 @@ class UserDatabaseManager:
                 print(f"Ошибка json: {e}")
 
         return []
-
 
 
     def add_message_to_user_message_history(self, user_id, new_message : Message):
