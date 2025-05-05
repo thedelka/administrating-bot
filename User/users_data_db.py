@@ -1,7 +1,8 @@
 import json
-import pickle, sqlite3, os
-from typing import Optional
+import sqlite3, os
+from aiogram.types import Message
 from Entities.user import User
+
 
 class UserDatabaseManager:
 
@@ -10,7 +11,6 @@ class UserDatabaseManager:
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         self._create_table()
-
 
     def _create_table(self) -> None:
         self.cursor.execute("""
@@ -23,9 +23,31 @@ class UserDatabaseManager:
         self.connection.commit()
 
 
+    def _serialize_message(self, new_message : Message) -> dict:
+
+        message_data = {
+            'message_id' : new_message.message_id,
+            'content_type' : new_message.content_type
+        }
+
+        if new_message.text:
+            message_data['text'] = new_message.text
+        elif new_message.caption:
+            message_data['caption'] = new_message.caption
+
+        if new_message.content_type != "text":
+            media = getattr(new_message, new_message.content_type)
+            message_data["file_id"] = media[-1].file_id if new_message.content_type == "photo" else media.file_id
+
+        return message_data
+
+    def _deserialize_message(self, message_data : dict) -> dict:
+        return message_data
+
     def add_user(self, user : User):
-        messages = user.user_message_history
-        json_data = json.dumps(messages, ensure_ascii=False)
+        """Add user if user_id is not already in database"""
+        messages = [self._serialize_message(message) for message in user.user_message_history]
+        json_data = json.dumps(messages)
 
         self.cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
         user_id_value = self.cursor.fetchone()
@@ -36,35 +58,40 @@ class UserDatabaseManager:
             self.connection.commit()
 
 
-    def get_user_attribute(self, user_id, attribute : str):
-        self.cursor.execute(f"SELECT {attribute} FROM users_data WHERE user_id = ?",
+    def get_user_messages(self, user_id):
+        self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
                             (user_id,))
-        user_attribute_value = self.cursor.fetchone()
+        user_messages_value = self.cursor.fetchone()
 
-        return user_attribute_value[0] if user_attribute_value is not None else None
+        if user_messages_value[0]:
+            try:
+                return [self._deserialize_message(message) for message in json.loads(user_messages_value[0])]
+            except json.JSONDecodeError as e:
+                print(f"Ошибка json: {e}")
 
-    def update_user_message_history(self, user_id, new_message):
-        self.cursor.execute("SELECT user_messages FROM users_data WHERE user_id = ?", (user_id,))
-        user_data = self.cursor.fetchone()
+        return []
+
+
+
+    def add_message_to_user_message_history(self, user_id, new_message : Message):
+        messages = self.get_user_messages(user_id)
+        messages.append(self._serialize_message(new_message))
 
         try:
-            messages = []
-            if user_data[0]:
-                messages = json.loads(user_data[0])
-
-            if new_message:
-
-                messages.append(new_message)
-            else:
-                messages = []
 
             self.cursor.execute("UPDATE users_data SET user_messages = ? WHERE user_id = ?", (
                 json.dumps(messages, ensure_ascii=False), user_id
             ))
+
             self.connection.commit()
 
         except json.JSONDecodeError as e:
             print(f"Произошла ошибка из-за некорректного JSON: {e}")
+
+
+    def clear_user_message_history(self, user_id):
+        self.cursor.execute("UPDATE users_data SET user_messages = NULL WHERE user_id = ?", (user_id,))
+        self.connection.commit()
 
 
 db_manager = UserDatabaseManager()

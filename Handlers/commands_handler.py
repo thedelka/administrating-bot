@@ -12,7 +12,7 @@ router = Router()
 
 
 @router.message(Command("start"))
-async def start_command(message : Message, state : FSMContext):
+async def start_command(message : Message):
 
     start_text = json.loads(get_config("MESSAGES", 'start_text'))
     help_user_text = json.loads(get_config("MESSAGES", 'help_user_text'))

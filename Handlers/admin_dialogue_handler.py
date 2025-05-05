@@ -47,28 +47,23 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
 
     try:
 
-        message_history = db_manager.get_user_attribute(user_id, "user_messages")
-
-        if isinstance(message_history, str):
-            message_history = json.loads(message_history)
-        elif not isinstance(message_history, list):
-            message_history = []
+        message_history = db_manager.get_user_messages(user_id) #-> list[dict]
 
         archive_messages = []
         archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
         archive_messages.append(archive_messes_text.message_id)
 
-        for message in message_history:
-            if isinstance(message, str):
-                sent_message = await callback.message.answer(message)
-                archive_messages.append(sent_message.message_id)
+        for message_data in message_history:
+
+            sent_message = await callback.message.answer(f"{message_data}") #здесь отправляется поочередно сообщение из истории
+
+            archive_messages.append(sent_message.message_id)
 
         await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
-
         await state.set_data({"temp_mess_history": archive_messages})
-    except Exception as e:
-        print(e)
 
+    except Exception as e:
+        print(f"Во время отправления истории чата с пользователем произошла ошибка: {e}")
 
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
 async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
@@ -86,7 +81,7 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     close_dialogue_text = json.loads(get_config("MESSAGES", "close_dialogue_text"))
 
     await bot.send_message(user_id, close_dialogue_text)
-    db_manager.update_user_message_history(user_id, None)
+    db_manager.clear_user_message_history(user_id)
 
     if user_id in [admin.admin_user_id for admin in admins_list]:
         get_admin(callback.from_user.id).texting_user_id.remove(user_id)

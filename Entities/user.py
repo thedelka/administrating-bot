@@ -1,8 +1,10 @@
 from typing import Optional
+from aiogram.types import Message
+
 
 class User:
     def __init__(self, user_id, user_name,
-                 message_history : Optional[list] = None):
+                 message_history : Optional[list[Message]] = None):
 
         if message_history is None:
             message_history = []
