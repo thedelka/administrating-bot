@@ -3,9 +3,10 @@ from Keyboards.menu_keyboard import menu_pages_builders
 from Settings.get_config import get_config
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram import  Router
+from aiogram import Router, Bot
 from User.users_data_db import db_manager
 from Entities.user import User
+from User.users_data_db import serialize_message
 
 router = Router()
 
@@ -22,3 +23,26 @@ async def start_command(message : Message):
     await message.answer(text=start_text, reply_markup=menu_pages_builders[0])
 
     await message.answer(f"{help_user_text}")
+
+async def send_message_according_to_type(user_or_admin_id, bot : Bot, new_message : Message, user_id =  None):
+    """Check type of message and SEND MESSAGE ACCORDING TO its TYPE"""
+    message_data = serialize_message(new_message)
+
+    types_dict = {
+        "text": lambda b, a_i: (b.send_message(a_i, message_data["text"])),
+        "photo": lambda b, a_i: (b.send_photo(a_i, message_data["file_id"], caption=message_data["caption"])),
+        "document": lambda b, a_i: (b.send_document(a_i, message_data["file_id"])),
+        "sticker": lambda b, a_i: (b.send_sticker(a_i, message_data["file_id"])),
+        "video": lambda b, a_i: (b.send_video(a_i, message_data["file_id"])),
+        "voice": lambda b, a_i: (b.send_voice(a_i, message_data["file_id"]))
+    }
+
+    for attribute, send_method in types_dict.items():
+
+        if message_data["content_type"] == attribute:
+
+            await send_method(bot, user_or_admin_id)
+            if user_id:
+                db_manager.add_message_to_user_message_history(user_id, new_message)
+
+            break

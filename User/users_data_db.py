@@ -4,13 +4,38 @@ from aiogram.types import Message
 from Entities.user import User
 
 
+def serialize_message(new_message : Message) -> dict:
+    """Transform message into dict with message information and return it"""
+
+    message_data = {
+        'message_id' : new_message.message_id,
+        'content_type' : new_message.content_type
+    }
+
+    if new_message.text:
+        message_data['text'] = new_message.text
+    elif new_message.caption:
+        message_data['caption'] = new_message.caption
+
+    if new_message.content_type != "text":
+        media = getattr(new_message, new_message.content_type)
+        message_data["file_id"] = media[-1].file_id if new_message.content_type == "photo" else media.file_id
+
+    return message_data
+
+def deserialize_message(message_data : dict) -> dict:
+    return message_data
+
+
 class UserDatabaseManager:
+
 
     def __init__(self, db_name : str = "users_data.db"):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         self._create_table()
+
 
     def _create_table(self) -> None:
         self.cursor.execute("""
@@ -22,32 +47,9 @@ class UserDatabaseManager:
 
         self.connection.commit()
 
-
-    def _serialize_message(self, new_message : Message) -> dict:
-        """Transform message into dict with message information and return it"""
-
-        message_data = {
-            'message_id' : new_message.message_id,
-            'content_type' : new_message.content_type
-        }
-
-        if new_message.text:
-            message_data['text'] = new_message.text
-        elif new_message.caption:
-            message_data['caption'] = new_message.caption
-
-        if new_message.content_type != "text":
-            media = getattr(new_message, new_message.content_type)
-            message_data["file_id"] = media[-1].file_id if new_message.content_type == "photo" else media.file_id
-
-        return message_data
-
-    def _deserialize_message(self, message_data : dict) -> dict:
-        return message_data
-
     def add_user(self, user : User):
         """Add user if user_id is not already in database"""
-        messages = [self._serialize_message(message) for message in user.user_message_history]
+        messages = [serialize_message(message) for message in user.user_message_history]
         json_data = json.dumps(messages)
 
         self.cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
@@ -67,7 +69,7 @@ class UserDatabaseManager:
 
         if user_messages_value[0]:
             try:
-                return [self._deserialize_message(message) for message in json.loads(user_messages_value[0])]
+                return [deserialize_message(message) for message in json.loads(user_messages_value[0])]
             except json.JSONDecodeError as e:
                 print(f"Ошибка json: {e}")
 
@@ -76,7 +78,7 @@ class UserDatabaseManager:
 
     def add_message_to_user_message_history(self, user_id, new_message : Message):
         messages = self.get_user_messages(user_id)
-        messages.append(self._serialize_message(new_message))
+        messages.append(serialize_message(new_message))
 
         try:
 
