@@ -1,5 +1,4 @@
 import json
-from aiogram.fsm.context import FSMContext
 from Keyboards.menu_keyboard import menu_pages_builders
 from Settings.get_config import get_config
 from aiogram.filters import Command

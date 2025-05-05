@@ -55,7 +55,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
 
         for message_data in message_history:
 
-            sent_message = await callback.message.answer(f"{message_data}") #здесь отправляется поочередно сообщение из истории
+            sent_message = await callback.message.answer(f"{message_data}") #здесь отправляется поочередно сообщение из истории, недоделано
 
             archive_messages.append(sent_message.message_id)
 
@@ -99,5 +99,3 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
 
     print(f"Список обрабатывающихся админов пользователей: {get_admin(callback.from_user.id).texting_user_id}")
     print(f"Состояние пользователя: {await storage.get_state(key=target_key)}")
-
-
