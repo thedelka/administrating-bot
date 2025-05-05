@@ -47,7 +47,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext):
     await callback.answer()
 
     archive_messages = []
-    message_history = db_manager.get_user_attribute(user_id, "user_messages")
+    message_history = db_manager.get_user_attribute(user_id, "user_messages") #TODO: исправить ошибку что некорректно выводится история диалога
 
     archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
     archive_messages.append(archive_messes_text.message_id)
