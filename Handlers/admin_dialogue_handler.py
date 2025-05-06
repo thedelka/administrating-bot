@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 from Entities.admin import get_admin, admins_list
 from Settings.get_config import get_config
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, Chat
 from States.admin_state import AdminState
 from aiogram import Router, Bot, F
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
@@ -48,18 +48,18 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
 
     try:
 
-        message_history = db_manager.get_user_messages(user_id) #-> list[dict]
+        message_history = db_manager.get_user_messages(user_id) #-> здесь хранится список словарей. а для функции нужен объект message.
 
         archive_messages = []
         archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
         archive_messages.append(archive_messes_text.message_id)
 
-        # text, content_type, message_id, caption (if it is), file id
+        # text, content_type, message_id, caption (если есть), file id (если медиа)
 
         for message in message_history:
 
-            await callback.message.answer(f"{message}")
-            # archive_messages.append(sent_message.message_id)
+            await send_message_according_to_type(user_id, bot, message_for_function)
+
 
         await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
         await state.set_data({"temp_mess_history": archive_messages})
@@ -67,7 +67,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
     except Exception as e:
         print(f"Во время отправления истории чата с пользователем произошла ошибка: {e}")
 
-#TODO: понять, как список словарей преобразовать для функции send_message_accroding_to_type и как то успеть сделать
+#TODO: понять, как список словарей преобразовать для функции send_message_accroding_to_type, и как то успеть сделать
 #TODO: логику рассылки обращений по свободным админам и кнопки админа "я готов" и "я устал"
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
 async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):

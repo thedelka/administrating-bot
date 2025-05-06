@@ -24,9 +24,8 @@ async def start_command(message : Message):
 
     await message.answer(f"{help_user_text}")
 
-async def send_message_according_to_type(user_or_admin_id, bot : Bot, new_message : Message, user_id =  None):
+async def send_message_according_to_type(target_id, bot : Bot, message_data : dict, user_id =  None):
     """Check type of message and SEND MESSAGE ACCORDING TO its TYPE"""
-    message_data = serialize_message(new_message)
 
     types_dict = {
         "text": lambda b, a_i: (b.send_message(a_i, message_data["text"])),
@@ -41,7 +40,8 @@ async def send_message_according_to_type(user_or_admin_id, bot : Bot, new_messag
 
         if message_data["content_type"] == attribute:
 
-            await send_method(bot, user_or_admin_id)
+            await send_method(bot, target_id)
+
             if user_id:
                 db_manager.add_message_to_user_message_history(user_id, new_message)
 
