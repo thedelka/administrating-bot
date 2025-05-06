@@ -63,7 +63,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
     except Exception as e:
         print(f"Во время отправления истории чата с пользователем произошла ошибка: {e}")
 
-#TODO: логику рассылки обращений по свободным админам и кнопки админа "я готов" и "я устал" + сделать возможность админу отправлять фото с подписью
+#TODO: логику рассылки обращений по свободным админам и кнопки админа "я готов" и "я устал"
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
 async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
     data = await state.get_data()

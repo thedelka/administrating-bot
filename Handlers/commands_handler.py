@@ -6,7 +6,6 @@ from aiogram.types import Message
 from aiogram import Router, Bot
 from Database.users_data_db import db_manager
 from Entities.user import User
-from Database.users_data_db import serialize_message
 
 router = Router()
 
