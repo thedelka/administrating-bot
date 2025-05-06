@@ -1,5 +1,4 @@
-import logging
-import asyncio
+import logging, asyncio
 from Settings.get_config import get_config
 from aiogram import Bot, Dispatcher
 from Handlers.commands_handler import router as commands_handler_router
@@ -18,8 +17,6 @@ dp.include_routers(commands_handler_router, menu_handler_router, start_dialogue_
 
 async def main():
     await dp.start_polling(bot)
-
-
 
 if __name__ == '__main__':
     try:

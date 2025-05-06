@@ -1,62 +1,100 @@
-import pickle
-import sqlite3
-import os
+import json
+import sqlite3, os
+from aiogram.types import Message
 from Entities.user import User
 
-db_path = os.path.join(os.path.dirname(__file__), "users_data.db")
-connection = sqlite3.connect(db_path)
-cursor = connection.cursor()
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users_data (
-user_id INTEGER NOT NULL,
-user BLOB
-)""")
+def serialize_message(new_message : Message) -> dict:
+    """Transform message into dict with message information and return it"""
 
-connection.commit()
+    message_data = {
+        'message_id' : new_message.message_id,
+        'content_type' : new_message.content_type
+    }
 
-def add_user(user : User):
-    cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
-    user_id_value = cursor.fetchone()
+    if new_message.text:
+        message_data['text'] = new_message.text
+    elif new_message.caption:
+        message_data['caption'] = new_message.caption
 
-    if user_id_value is None:
-        cursor.execute("INSERT INTO users_data (user_id, user) VALUES (?, ?)", (user.user_id, pickle.dumps(user)))
-        connection.commit()
+    if new_message.content_type != "text":
+        media = getattr(new_message, new_message.content_type)
+        message_data["file_id"] = media[-1].file_id if new_message.content_type == "photo" else media.file_id
+
+    return message_data
+
+def deserialize_message(message_data : dict) -> dict:
+    return message_data
 
 
-def get_user(user_id):
-    cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
-    user_data = cursor.fetchone()
+class UserDatabaseManager:
 
-    try:
-        binary_data = user_data[0]
-        user = pickle.loads(binary_data)
 
-        return user
+    def __init__(self, db_name : str = "users_data.db"):
+        self.db_path = os.path.join(os.path.dirname(__file__), db_name)
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+        self._create_table()
 
-    except Exception as e:
-        print(f"Произошла ошибка! {e}")
-        return None
 
-def add_message_to_history(user_id, new_message):
-    cursor.execute("SELECT user FROM users_data WHERE user_id = ?", (user_id,))
-    user_data = cursor.fetchone()
+    def _create_table(self) -> None:
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users_data (
+        user_id INTEGER NOT NULL,
+        user_name TEXT NOT NULL,
+        user_messages TEXT
+        )""")
 
-    try:
-        binary = user_data[0]
-        user : User = pickle.loads(binary)
+        self.connection.commit()
 
-        user.user_message_history.append(new_message)
+    def add_user(self, user : User):
+        """Add user if user_id is not already in database"""
+        messages = [serialize_message(message) for message in user.user_message_history]
+        json_data = json.dumps(messages)
 
-        setattr(user, "user_message_history", user.user_message_history)
+        self.cursor.execute("SELECT user_id FROM users_data WHERE user_id = ?", (user.user_id,))
+        user_id_value = self.cursor.fetchone()
 
-        cursor.execute("UPDATE users_data set user = ? WHERE user_id = ?", (pickle.dumps(user), user_id))
-        connection.commit()
+        if user_id_value is None:
+            self.cursor.execute("INSERT INTO users_data (user_id, user_name, user_messages) VALUES (?, ?, ?)",
+                                (user.user_id, user.user_name, json_data))
+            self.connection.commit()
 
-    except (TypeError, IndexError) as e:
-        print(f"Ошибка при обновлении истории сообщений пользователя: {e}")
 
-    except Exception as e:
-        print(f"Произошла другая ошибка: {e}")
+    def get_user_messages(self, user_id):
+        """Get user messages history as list of every message information (list of dicts)"""
+        self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
+                            (user_id,))
+        user_messages_value = self.cursor.fetchone()
 
-connection.commit()
+        if user_messages_value[0]:
+            try:
+                return [deserialize_message(message) for message in json.loads(user_messages_value[0])]
+            except json.JSONDecodeError as e:
+                print(f"Ошибка json: {e}")
+
+        return []
+
+
+    def add_message_to_user_message_history(self, user_id, new_message_data):
+        messages = self.get_user_messages(user_id)
+        messages.append(new_message_data)
+
+        try:
+
+            self.cursor.execute("UPDATE users_data SET user_messages = ? WHERE user_id = ?", (
+                json.dumps(messages, ensure_ascii=False), user_id
+            ))
+
+            self.connection.commit()
+
+        except json.JSONDecodeError as e:
+            print(f"Произошла ошибка из-за некорректного JSON: {e}")
+
+
+    def clear_user_message_history(self, user_id):
+        self.cursor.execute("UPDATE users_data SET user_messages = NULL WHERE user_id = ?", (user_id,))
+        self.connection.commit()
+
+
+db_manager = UserDatabaseManager()
