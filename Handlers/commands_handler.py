@@ -4,9 +4,9 @@ from Settings.get_config import get_config
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import Router, Bot
-from User.users_data_db import db_manager
+from Database.users_data_db import db_manager
 from Entities.user import User
-from User.users_data_db import serialize_message
+from Database.users_data_db import serialize_message
 
 router = Router()
 
@@ -30,9 +30,9 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
     types_dict = {
         "text": lambda b, a_i: (b.send_message(a_i, message_data["text"])),
         "photo": lambda b, a_i: (b.send_photo(a_i, message_data["file_id"], caption=message_data.get("caption"))),
-        "document": lambda b, a_i: (b.send_document(a_i, message_data["file_id"])),
+        "document": lambda b, a_i: (b.send_document(a_i, message_data["file_id"], caption=message_data.get("caption"))),
         "sticker": lambda b, a_i: (b.send_sticker(a_i, message_data["file_id"])),
-        "video": lambda b, a_i: (b.send_video(a_i, message_data["file_id"])),
+        "video": lambda b, a_i: (b.send_video(a_i, message_data["file_id"], caption=message_data.get("caption"))),
         "voice": lambda b, a_i: (b.send_voice(a_i, message_data["file_id"]))
     }
 

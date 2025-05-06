@@ -19,7 +19,7 @@ for _ in range(max_menu_pages):
 
     for _ in range(buttons_for_page):
 
-        current_button = menu_buttons_texts[button_index].replace("\u200d", "") #\u200d пишется перед смайлами, его надо убрать
+        current_button = menu_buttons_texts[button_index].replace("\u200d", "") #\u200d auto-writes before stickers
 
         button_index += 1 if button_index < buttons_quantity else button_index
         page_buttons[current_button] = current_button
@@ -28,7 +28,7 @@ for _ in range(max_menu_pages):
 
 if last_page_buttons_count > 0:
 
-    last_buttons = menu_buttons_texts[-last_page_buttons_count:]
+    last_buttons = menu_buttons_texts[-last_page_buttons_count:] #get last buttons of list
 
     last_page_buttons_dict = {}
 

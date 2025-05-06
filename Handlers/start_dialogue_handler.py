@@ -2,7 +2,7 @@ import datetime, json
 from aiogram.fsm.context import FSMContext
 from pytz import timezone
 from Settings.get_config import get_config
-from User.users_data_db import  db_manager
+from Database.users_data_db import  db_manager
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot
@@ -10,7 +10,7 @@ from Entities.admin import get_admins_ids_list
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
-from User.users_data_db import serialize_message
+from Database.users_data_db import serialize_message
 router = Router()
 
 
