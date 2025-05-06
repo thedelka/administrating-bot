@@ -76,9 +76,9 @@ class UserDatabaseManager:
         return []
 
 
-    def add_message_to_user_message_history(self, user_id, new_message : Message):
+    def add_message_to_user_message_history(self, user_id, new_message_data):
         messages = self.get_user_messages(user_id)
-        messages.append(serialize_message(new_message))
+        messages.append(new_message_data)
 
         try:
 

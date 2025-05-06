@@ -10,7 +10,7 @@ from Entities.admin import get_admins_ids_list
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
-
+from User.users_data_db import serialize_message
 router = Router()
 
 
@@ -29,7 +29,7 @@ async def send_type_message(message: Message, bot : Bot):
                                          f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"
                                          f"Дата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
 
-        await send_message_according_to_type(admin_id, bot, message, user_id)
+        await send_message_according_to_type(admin_id, bot, serialize_message(message), user_id)
 
     print(f"Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
 

@@ -8,7 +8,7 @@ from aiogram.types import Message, CallbackQuery, Chat
 from States.admin_state import AdminState
 from aiogram import Router, Bot, F
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
-from User.users_data_db import db_manager
+from User.users_data_db import db_manager, serialize_message
 from Handlers.commands_handler import send_message_according_to_type
 
 router = Router()
@@ -29,7 +29,7 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
 
-    print(f"Список обрабатывающихся админов пользователей: {get_admin(callback.from_user.id).texting_user_id}")
+    print(f"Список обрабатывающихся админом пользователей: {get_admin(callback.from_user.id).texting_user_id}")
 
 
 @router.message(StateFilter(AdminState.texting))
@@ -38,7 +38,7 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
     data = await state.get_data()
     current_user_id = data["current_user_id"]
 
-    await bot.send_message(current_user_id, message.text)
+    await send_message_according_to_type(current_user_id, bot, serialize_message(message))
 
 
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
@@ -48,7 +48,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
 
     try:
 
-        message_history = db_manager.get_user_messages(user_id) #-> здесь хранится список словарей. а для функции нужен объект message.
+        message_history = db_manager.get_user_messages(user_id) #-> здесь хранится список словарей-информации о message
 
         archive_messages = []
         archive_messes_text = await callback.message.answer("🗄Архивные сообщения🗄")
@@ -57,8 +57,8 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
         # text, content_type, message_id, caption (если есть), file id (если медиа)
 
         for message in message_history:
-
-            await send_message_according_to_type(user_id, bot, message_for_function)
+            sent_message = await send_message_according_to_type(callback.message.chat.id, bot, message)
+            archive_messages.append(sent_message.message_id)
 
 
         await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}", reply_markup=create_clean_history_keyboard(user_id).as_markup())
@@ -67,16 +67,22 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
     except Exception as e:
         print(f"Во время отправления истории чата с пользователем произошла ошибка: {e}")
 
-#TODO: понять, как список словарей преобразовать для функции send_message_accroding_to_type, и как то успеть сделать
 #TODO: логику рассылки обращений по свободным админам и кнопки админа "я готов" и "я устал"
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
 async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
     data = await state.get_data()
-    archive_messages = data["temp_mess_history"]
+    archive_messages = data.get("temp_mess_history", [])
+    admin_chat_id = callback.message.chat.id
+
+    if archive_messages:
+        try:
+            await bot.delete_messages(admin_chat_id, archive_messages)
+        except Exception as e:
+
+            print(f"Ошибка при удалении сообщений: {e}")
+            await callback.answer("❌ Не удалось удалить часть сообщений", show_alert=True)
 
     await callback.message.delete()
-    await bot.delete_messages(callback.from_user.id, archive_messages)
-
 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
 async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
@@ -92,9 +98,7 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     else:
         print("ТАКОГО ЮЗЕРА И ТАК НЕ БЫЛО!")
 
-
     await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
-
     await state.clear()
 
     storage = state.storage

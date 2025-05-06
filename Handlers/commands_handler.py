@@ -29,7 +29,7 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
 
     types_dict = {
         "text": lambda b, a_i: (b.send_message(a_i, message_data["text"])),
-        "photo": lambda b, a_i: (b.send_photo(a_i, message_data["file_id"], caption=message_data["caption"])),
+        "photo": lambda b, a_i: (b.send_photo(a_i, message_data["file_id"], caption=message_data.get("caption"))),
         "document": lambda b, a_i: (b.send_document(a_i, message_data["file_id"])),
         "sticker": lambda b, a_i: (b.send_sticker(a_i, message_data["file_id"])),
         "video": lambda b, a_i: (b.send_video(a_i, message_data["file_id"])),
@@ -40,9 +40,7 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
 
         if message_data["content_type"] == attribute:
 
-            await send_method(bot, target_id)
-
             if user_id:
-                db_manager.add_message_to_user_message_history(user_id, new_message)
+                db_manager.add_message_to_user_message_history(user_id, message_data)
 
-            break
+            return await send_method(bot, target_id)
