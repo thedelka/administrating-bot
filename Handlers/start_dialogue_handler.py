@@ -6,7 +6,7 @@ from Database.users_data_db import  db_manager
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot
-from Entities.admin import get_admins_ids_list
+from Entities.admin import get_admins_ids_list, admins_list, Admin
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
@@ -14,22 +14,34 @@ from Database.users_data_db import serialize_message
 router = Router()
 
 
+def get_free_admin(admins : list[Admin]) -> Admin:
+    min_queries_admin = admins_list[0]
+
+    for admin in admins[1:]:
+        if admin.admin_queries_count < min_queries_admin.admin_queries_count:
+            min_queries_admin = admin
+
+    return min_queries_admin
+
+
+
+#смотрим у кого меньше всего юзеров обрабатывается. если таких несколько, то берем того, кто первый в списке.
+
 async def send_type_message(message: Message, bot : Bot):
     """Send user message to an admin"""
-
     tz = timezone(json.loads(get_config("BOT_CONSTANTS", "timezone")))
-
     time_now = datetime.datetime.now(tz).strftime("%H:%M:%S")
 
     user_id = message.from_user.id
 
 
-    for admin_id in get_admins_ids_list():
-        await bot.send_message(admin_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
+    admin_with_lowest_queries_id = get_free_admin(admins_list).admin_user_id
+
+    await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
                                          f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"
                                          f"Дата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
 
-        await send_message_according_to_type(admin_id, bot, serialize_message(message), user_id)
+    await send_message_according_to_type(admin_with_lowest_queries_id, bot, serialize_message(message), user_id)
 
     print(f"Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
 

@@ -2,7 +2,7 @@ import json
 import sqlite3, os
 from aiogram.types import Message
 from Entities.user import User
-
+from Entities.admin import get_admins_ids_list
 
 def serialize_message(new_message : Message) -> dict:
     """Transforms message into dict with message information and returns it"""
@@ -63,24 +63,22 @@ class UserDatabaseManager:
 
     def get_user_messages(self, user_id):
         """Get user messages history as list of every message information (list of dicts)"""
-        self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
-                            (user_id,))
-        user_messages_value = self.cursor.fetchone()
+        try:
+            self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
+                                (user_id,))
+            user_messages_value = self.cursor.fetchone()
 
-        if user_messages_value[0]:
-            try:
+            if user_messages_value[0]:
                 return [deserialize_message(message) for message in json.loads(user_messages_value[0])]
-            except json.JSONDecodeError as e:
-                print(f"Ошибка json: {e}")
+        except TypeError as e:
+            print(f"Скорее всего, используется айди админа: {e}")
 
-        return []
 
 
     def add_message_to_user_message_history(self, user_id, new_message_data):
-        messages = self.get_user_messages(user_id)
-        messages.append(new_message_data)
-
         try:
+            messages = self.get_user_messages(user_id)
+            messages.append(new_message_data)
 
             self.cursor.execute("UPDATE users_data SET user_messages = ? WHERE user_id = ?", (
                 json.dumps(messages, ensure_ascii=False), user_id
@@ -90,6 +88,9 @@ class UserDatabaseManager:
 
         except json.JSONDecodeError as e:
             print(f"Произошла ошибка из-за некорректного JSON: {e}")
+        except AttributeError as e:
+            print(f"Операция с айди админа: {e}")
+
 
 
     def clear_user_message_history(self, user_id):
