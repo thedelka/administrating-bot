@@ -10,6 +10,7 @@ class Admin:
         self.admin_name = admin_name
         self.texting_user_id = texting_user_id
         self.admin_queries_count = len(self.texting_user_id)
+        self.is_ready_for_work = False
 
 admins_list = [Admin(admin_info[0], admin_info[1]) for admin_info in json.loads(get_config("ADMIN", 'admins'))] #list of Admin-objects
 

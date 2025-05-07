@@ -11,8 +11,8 @@ from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
 from Database.users_data_db import serialize_message
-router = Router()
 
+router = Router()
 
 def get_free_admin(admins : list[Admin]) -> Admin:
     min_queries_admin = admins_list[0]
@@ -23,10 +23,6 @@ def get_free_admin(admins : list[Admin]) -> Admin:
 
     return min_queries_admin
 
-
-
-#смотрим у кого меньше всего юзеров обрабатывается. если таких несколько, то берем того, кто первый в списке.
-
 async def send_type_message(message: Message, bot : Bot):
     """Send user message to an admin"""
     tz = timezone(json.loads(get_config("BOT_CONSTANTS", "timezone")))
@@ -34,16 +30,16 @@ async def send_type_message(message: Message, bot : Bot):
 
     user_id = message.from_user.id
 
+    if user_id not in get_admins_ids_list():
+        admin_with_lowest_queries_id = get_free_admin(admins_list).admin_user_id
 
-    admin_with_lowest_queries_id = get_free_admin(admins_list).admin_user_id
+        await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
+                                             f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"
+                                             f"Дата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
 
-    await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
-                                         f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"
-                                         f"Дата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
+        await send_message_according_to_type(admin_with_lowest_queries_id, bot, serialize_message(message), user_id)
 
-    await send_message_according_to_type(admin_with_lowest_queries_id, bot, serialize_message(message), user_id)
-
-    print(f"Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
+        print(f"Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
 
 
 @router.message(StateFilter(None))
