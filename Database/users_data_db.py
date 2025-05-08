@@ -65,8 +65,9 @@ class UserDatabaseManager:
 
             if user_messages_value[0]:
                 return [message for message in json.loads(user_messages_value[0])]
+            return []
         except TypeError as e:
-            print(f"Скорее всего, используется айди админа: {e}")
+            print(f"[ERROR] Скорее всего, используется айди админа: {e}")
 
 
 
@@ -82,9 +83,9 @@ class UserDatabaseManager:
             self.connection.commit()
 
         except json.JSONDecodeError as e:
-            print(f"Произошла ошибка из-за некорректного JSON: {e}")
+            print(f"[ERROR] Произошла ошибка из-за некорректного JSON: {e}")
         except AttributeError as e:
-            print(f"Операция с айди админа: {e}")
+            print(f"[ERROR]: {e}")
 
 
     def clear_user_message_history(self, user_id):

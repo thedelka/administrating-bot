@@ -1,4 +1,4 @@
-import datetime, json
+import datetime
 from aiogram.fsm.context import FSMContext
 from pytz import timezone
 from Settings.get_config import config_manager
@@ -33,13 +33,12 @@ async def send_type_message(message: Message, bot : Bot):
     if user_id not in config_manager.get_admins_ids_list():
         admin_with_lowest_queries_id = get_free_admin(config_manager.admins_list).admin_user_id
 
-        await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
-                                             f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"
-                                             f"Дата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
+        await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ {message.from_user.id} "
+                                             f"\nДата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
 
         await send_message_according_to_type(admin_with_lowest_queries_id, bot, serialize_message(message), user_id)
 
-        print(f"Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
+        print(f"[DEBUG] Сообщения пользователя: {db_manager.get_user_messages(user_id)}")
 
 
 @router.message(StateFilter(None))
@@ -52,7 +51,7 @@ async def send_user_message(message : Message, bot : Bot, state : FSMContext):
 
     await state.set_state(DialogueState.dialogue_open)
 
-    print(f'Текуще состояние диалога у юзера: {await state.get_state()}')
+    print(f'[DEBUG] Текуще состояние диалога у юзера: {await state.get_state()}')
 
 
 @router.message(StateFilter(DialogueState.dialogue_open))

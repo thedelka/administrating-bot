@@ -46,5 +46,7 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
 
             if user_id:
                 db_manager.add_message_to_user_message_history(user_id, message_data)
+                print("СООБЩЕНИЕ ДОБАЛЕНО В ИТОСРИЮ")
+                print(message_data)
 
             return await send_method(bot, target_id)
