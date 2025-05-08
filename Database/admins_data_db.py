@@ -1,6 +1,6 @@
 import json
 import sqlite3, os
-from Entities.admin import Admin
+from BotEntities.admin import Admin
 
 class AdminDatabaseManager:
     def __init__(self, db_name : str = "admins_data.db"):
@@ -15,7 +15,8 @@ class AdminDatabaseManager:
                             admin_id INTEGER NOT NULL,
                             admin_name TEXT NOT NULL,
                             admin_texting_user_id TEXT,
-                            admin_states_info TEXT""")
+                            admin_queries_count INTEGER NOT NULL,
+                            admin_work_readiness BOOLEAN""")
 
         self.connection.commit()
 

@@ -1,10 +1,10 @@
 from aiogram import Router, types
-from Entities.admin import get_admin
+from Settings.get_config import config_manager
 router = Router()
 
 @router.message(lambda message: message.text in ["Готов к работе", "Взять паузу"])
 async def change_admin_work_status(message: types.Message):
-    admin = get_admin(message.from_user.id)
+    admin = config_manager.get_admin(message.from_user.id)
 
     admin.is_ready_for_work = not admin.is_ready_for_work
 

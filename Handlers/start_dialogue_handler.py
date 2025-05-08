@@ -1,12 +1,12 @@
 import datetime, json
 from aiogram.fsm.context import FSMContext
 from pytz import timezone
-from Settings.get_config import get_config
+from Settings.get_config import config_manager
 from Database.users_data_db import  db_manager
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot
-from Entities.admin import get_admins_ids_list, admins_list, Admin
+from BotEntities.admin import Admin
 from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
@@ -15,7 +15,7 @@ from Database.users_data_db import serialize_message
 router = Router()
 
 def get_free_admin(admins : list[Admin]) -> Admin:
-    min_queries_admin = admins_list[0]
+    min_queries_admin = config_manager.admins_list[0]
 
     for admin in admins[1:]:
         if admin.admin_queries_count < min_queries_admin.admin_queries_count:
@@ -25,13 +25,13 @@ def get_free_admin(admins : list[Admin]) -> Admin:
 
 async def send_type_message(message: Message, bot : Bot):
     """Send user message to an admin"""
-    tz = timezone(json.loads(get_config("BOT_CONSTANTS", "timezone")))
+    tz = timezone(config_manager.get_config("BOT_CONSTANTS", "timezone"))
     time_now = datetime.datetime.now(tz).strftime("%H:%M:%S")
 
     user_id = message.from_user.id
 
-    if user_id not in get_admins_ids_list():
-        admin_with_lowest_queries_id = get_free_admin(admins_list).admin_user_id
+    if user_id not in config_manager.get_admins_ids_list():
+        admin_with_lowest_queries_id = get_free_admin(config_manager.admins_list).admin_user_id
 
         await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ "
                                              f"\n\nID пользователя: {message.from_user.id}\nИмя пользователя: @{message.from_user.username}\n"

@@ -1,13 +1,12 @@
-import json
 from aiogram.fsm.context import FSMContext
 from Keyboards.menu_keyboard import menu_buttons_texts
 from Keyboards.menu_keyboard import menu_pages_builders
-from Settings.get_config import get_config
+from Settings.get_config import config_manager
 from aiogram.types import CallbackQuery
 from aiogram import Router, F
 from Menu. menu_pages_changer import decrease_current_menu_page,increase_current_menu_page,get_current_menu_page
 
-menu_buttons = json.loads(get_config("HELP_MENU_SETTINGS", "buttons"))
+menu_buttons = config_manager.get_config("HELP_MENU_SETTINGS", "buttons")
 router = Router()
 
 

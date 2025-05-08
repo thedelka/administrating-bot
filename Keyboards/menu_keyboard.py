@@ -1,11 +1,10 @@
 import json
 from Menu.menu import Menu
-from Settings.get_config import get_config
-
-menu_buttons_texts = list(json.loads(get_config("HELP_MENU_SETTINGS", "buttons")).keys())
+from Settings.get_config import config_manager
+menu_buttons_texts = list(config_manager.get_config("HELP_MENU_SETTINGS", "buttons").keys())
 
 buttons_quantity = len(menu_buttons_texts)
-buttons_for_page = json.loads(get_config("HELP_MENU_SETTINGS", "buttons_for_page"))
+buttons_for_page = config_manager.get_config("HELP_MENU_SETTINGS", "buttons_for_page")
 max_menu_pages = buttons_quantity // buttons_for_page
 last_page_buttons_count = buttons_quantity % buttons_for_page
 

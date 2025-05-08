@@ -1,13 +1,13 @@
-import logging, asyncio
-from Settings.get_config import get_config
+import logging, asyncio, json
+from Settings.get_config import config_manager
 from aiogram import Bot, Dispatcher
 from Handlers.commands_handler import router as commands_handler_router
 from Handlers.menu_handler import router as menu_handler_router
 from Handlers.start_dialogue_handler import router as start_dialogue_handler_router
 from Handlers.admin_dialogue_handler import router as dialogue_handler_router
-from Handlers.admin_change_work_readiness_handler import router as admin_change_work_readiness_router
+from Handlers.admin_work_status_handler import router as admin_change_work_readiness_router
 
-TOKEN = get_config('BOT_CONSTANTS', 'TOKEN')
+TOKEN = config_manager.get_config('BOT_CONSTANTS', 'TOKEN')
 
 bot = Bot(TOKEN)
 dp = Dispatcher()

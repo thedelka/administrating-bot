@@ -1,23 +1,21 @@
-import json
 from Keyboards.menu_keyboard import menu_pages_builders
-from Settings.get_config import get_config
+from Settings.get_config import config_manager
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import Router, Bot
 from Database.users_data_db import db_manager
-from Entities.user import User
-from Entities.admin import get_admins_ids_list, get_admin
-from Keyboards.change_admin_work_readiness_keyboard import create_work_readiness_keyboard
-router = Router()
+from BotEntities.user import User
+from Keyboards.admin_work_status_keyboard import create_work_readiness_keyboard
 
+router = Router()
 
 @router.message(Command("start"))
 async def start_command(message : Message):
 
-    if message.from_user.id not in get_admins_ids_list():
+    if message.from_user.id not in config_manager.get_admins_ids_list():
 
-        start_text = json.loads(get_config("MESSAGES", 'start_text_user'))
-        help_user_text = json.loads(get_config("MESSAGES", 'help_user_text'))
+        start_text = config_manager.get_config("MESSAGES", 'start_text_user')
+        help_user_text = config_manager.get_config("MESSAGES", 'help_user_text')
 
         user = User(message.from_user.id, message.from_user.username)
         db_manager.add_user(user)
@@ -26,8 +24,8 @@ async def start_command(message : Message):
         await message.answer(help_user_text)
 
     else:
-        start_text = json.loads(get_config("MESSAGES", "start_text_admin"))
-        await message.answer(start_text, reply_markup=create_work_readiness_keyboard(get_admin(message.from_user.id).is_ready_for_work))
+        start_text = config_manager.get_config("MESSAGES", "start_text_admin")
+        await message.answer(start_text, reply_markup=create_work_readiness_keyboard(config_manager.get_admin(message.from_user.id).is_ready_for_work))
 
 
 async def send_message_according_to_type(target_id, bot : Bot, message_data : dict, user_id =  None):

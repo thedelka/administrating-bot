@@ -1,8 +1,7 @@
 import json
 import sqlite3, os
 from aiogram.types import Message
-from Entities.user import User
-from Entities.admin import get_admins_ids_list
+from BotEntities.user import User
 
 def serialize_message(new_message : Message) -> dict:
     """Transforms message into dict with message information and returns it"""
@@ -23,12 +22,7 @@ def serialize_message(new_message : Message) -> dict:
 
     return message_data
 
-def deserialize_message(message_data : dict) -> dict:
-    return message_data
-
-
 class UserDatabaseManager:
-
 
     def __init__(self, db_name : str = "users_data.db"):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
@@ -46,6 +40,7 @@ class UserDatabaseManager:
         )""")
 
         self.connection.commit()
+
 
     def add_user(self, user : User):
         """Add user if user_id is not already in database"""
@@ -69,7 +64,7 @@ class UserDatabaseManager:
             user_messages_value = self.cursor.fetchone()
 
             if user_messages_value[0]:
-                return [deserialize_message(message) for message in json.loads(user_messages_value[0])]
+                return [message for message in json.loads(user_messages_value[0])]
         except TypeError as e:
             print(f"Скорее всего, используется айди админа: {e}")
 
@@ -90,7 +85,6 @@ class UserDatabaseManager:
             print(f"Произошла ошибка из-за некорректного JSON: {e}")
         except AttributeError as e:
             print(f"Операция с айди админа: {e}")
-
 
 
     def clear_user_message_history(self, user_id):

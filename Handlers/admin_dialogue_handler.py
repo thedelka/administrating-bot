@@ -1,9 +1,10 @@
 import json
+from compileall import compile_file
+
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
-from Entities.admin import get_admin, admins_list
-from Settings.get_config import get_config
+from Settings.get_config import config_manager
 from aiogram.types import Message, CallbackQuery
 from States.admin_state import AdminState
 from aiogram import Router, Bot, F
@@ -20,16 +21,16 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
 
     user_id = callback.data.split("_")[-1]
 
-    operator_found_text = json.loads(get_config("MESSAGES", "found_not_taken_admin_text")) #сделать так чтобы это писалось только в первый раз нажатия
+    operator_found_text = config_manager.get_config("MESSAGES", "found_not_taken_admin_text") #сделать так чтобы это писалось только в первый раз нажатия
 
     await bot.send_message(user_id, operator_found_text)
 
-    get_admin(callback.from_user.id).texting_user_id.append(user_id)
+    config_manager.get_admin(callback.from_user.id).texting_user_id.append(user_id)
 
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
 
-    print(f"Список обрабатывающихся админом пользователей: {get_admin(callback.from_user.id).texting_user_id}")
+    print(f"Список обрабатывающихся админом пользователей: {config_manager.get_admin(callback.from_user.id).texting_user_id}")
 
 
 @router.message(StateFilter(AdminState.texting))
@@ -85,13 +86,13 @@ async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, 
 async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
     user_id = callback.data.split("_")[-1]
 
-    close_dialogue_text = json.loads(get_config("MESSAGES", "close_dialogue_text"))
+    close_dialogue_text = config_manager.get_config("MESSAGES", "close_dialogue_text")
 
     await bot.send_message(user_id, close_dialogue_text)
     db_manager.clear_user_message_history(user_id)
 
-    if user_id in [admin.admin_user_id for admin in admins_list]:
-        get_admin(callback.from_user.id).texting_user_id.remove(user_id)
+    if user_id in [admin.admin_user_id for admin in config_manager.admins_list]:
+        config_manager.get_admin(callback.from_user.id).texting_user_id.remove(user_id)
     else:
         print("ТАКОГО ЮЗЕРА И ТАК НЕ БЫЛО!")
 
@@ -102,5 +103,5 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
     await storage.set_state(key=target_key, state = None)
 
-    print(f"Список обрабатывающихся админов пользователей: {get_admin(callback.from_user.id).texting_user_id}")
+    print(f"Список обрабатывающихся админов пользователей: {config_manager.get_admin(callback.from_user.id).texting_user_id}")
     print(f"Состояние пользователя: {await storage.get_state(key=target_key)}")
