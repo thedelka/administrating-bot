@@ -16,7 +16,7 @@ class AdminDatabaseManager:
                             admin_name TEXT NOT NULL,
                             admin_texting_user_id TEXT,
                             admin_queries_count INTEGER NOT NULL,
-                            admin_work_readiness BOOLEAN""")
+                            admin_is_ready BOOLEAN""")
 
         self.connection.commit()
 

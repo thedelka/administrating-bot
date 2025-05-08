@@ -5,7 +5,7 @@ from aiogram.types import Message
 from aiogram import Router, Bot
 from Database.users_data_db import db_manager
 from BotEntities.user import User
-from Keyboards.admin_work_status_keyboard import create_work_readiness_keyboard
+from Keyboards.admin_work_status_keyboard import get_work_status_kb
 
 router = Router()
 
@@ -25,7 +25,7 @@ async def start_command(message : Message):
 
     else:
         start_text = config_manager.get_config("MESSAGES", "start_text_admin")
-        await message.answer(start_text, reply_markup=create_work_readiness_keyboard(config_manager.get_admin(message.from_user.id).is_ready_for_work))
+        await message.answer(start_text, reply_markup=get_work_status_kb(config_manager.get_admin(message.from_user.id).is_ready))
 
 
 async def send_message_according_to_type(target_id, bot : Bot, message_data : dict, user_id =  None):
@@ -46,7 +46,5 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
 
             if user_id:
                 db_manager.add_message_to_user_message_history(user_id, message_data)
-                print("СООБЩЕНИЕ ДОБАЛЕНО В ИТОСРИЮ")
-                print(message_data)
 
             return await send_method(bot, target_id)
