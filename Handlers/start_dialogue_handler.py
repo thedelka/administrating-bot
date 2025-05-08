@@ -1,6 +1,8 @@
 import datetime
 from aiogram.fsm.context import FSMContext
 from pytz import timezone
+from typing_extensions import Optional
+
 from Settings.get_config import config_manager
 from Database.users_data_db import  db_manager
 from aiogram.types import Message
@@ -11,17 +13,21 @@ from States.dialogue_state import DialogueState
 from Keyboards.user_message_keyboard import create_user_message_keyboard
 from Handlers.commands_handler import send_message_according_to_type
 from Database.users_data_db import serialize_message
+from typing import Optional
 
 router = Router()
 
-def get_free_admin(admins : list[Admin]) -> Admin:
-    min_queries_admin = config_manager.admins_list[0]
+def get_free_admin(admins : list[Admin]) -> Optional[Admin]:
+    available_admins = [admin for admin in admins if admin.is_ready]
 
-    for admin in admins[1:]:
-        if admin.admin_queries_count < min_queries_admin.admin_queries_count:
-            min_queries_admin = admin
+    if not available_admins:
+        return None
 
-    return min_queries_admin
+    min_queries = min(admin.admin_queries_count for admin in available_admins)
+
+    min_queries_admins = [admin for admin in available_admins if admin.admin_queries_count == min_queries]
+
+    return min_queries_admins[0]
 
 async def send_type_message(message: Message, bot : Bot):
     """Send user message to an admin"""
