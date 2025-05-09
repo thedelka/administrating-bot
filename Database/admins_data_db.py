@@ -1,12 +1,20 @@
 import json, sqlite3, os
-from typing import Optional
-
 from BotEntities.admin import Admin
 from Settings.get_config import config_manager
 
-def _fill_admin_db(admins_list = config_manager.get_admins_list()):
+
+def _fill_admin_db(admins_list=config_manager.get_admins_list()):
+    current_admin_ids = {admin.admin_user_id for admin in admins_list}
+
+    admin_db_manager.cursor.execute("SELECT admin_id FROM admins_data")
+    db_admin_ids = {row[0] for row in admin_db_manager.cursor.fetchall()}
+
     for admin_info in admins_list:
         admin_db_manager.add_admin(admin_info)
+
+    for db_admin_id in db_admin_ids - current_admin_ids:
+        admin_db_manager.remove_admin(db_admin_id)
+
 
 class AdminDatabaseManager:
 
@@ -38,6 +46,10 @@ class AdminDatabaseManager:
             self.cursor.execute("INSERT INTO admins_data (admin_id, admin_name, admin_texting_user_id, admin_queries_count, admin_is_ready) VALUES (?, ?, ?, ?, ?)",
                                 (admin.admin_user_id, admin.admin_name, json_texting_users_data, admin.admin_queries_count, admin.is_ready))
             self.connection.commit()
+
+    def remove_admin(self, admin_id):
+        self.cursor.execute("DELETE FROM admins_data WHERE admin_id = ?", (admin_id,))
+        self.connection.commit()
 
     def print_db(self):
         self.cursor.execute("SELECT * FROM admins_data")
@@ -83,5 +95,6 @@ class AdminDatabaseManager:
         return current_is_ready
 
 admin_db_manager = AdminDatabaseManager()
+
 _fill_admin_db()
 admin_db_manager.print_db()
