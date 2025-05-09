@@ -44,13 +44,14 @@ class AdminDatabaseManager:
         data = self.cursor.fetchall()
 
         print(data)
+        return data
 
     def admin_texting_user_id_operation(self, admin_id, user_id= None, remove = False):
         """Returns admin_texting_user_id if user_id = None, updates admin_texting_user_id if user_id not None, removes
         user_id form texting_user_id if remove = True and user_id not None"""
         self.cursor.execute("SELECT admin_texting_user_id FROM admins_data WHERE admin_id = ?", (admin_id,))
         row = self.cursor.fetchone()
-        json_data : list = json.loads(row[0])
+        json_data : list = json.loads(row[0]) if row else []
 
         try:
             if user_id:
@@ -68,10 +69,18 @@ class AdminDatabaseManager:
     def change_admin_is_ready(self, admin_id):
         """Changes admin_is_ready to opposite value"""
         self.cursor.execute("SELECT admin_is_ready FROM admins_data WHERE admin_id = ?", (admin_id,))
+
         current_is_ready = self.cursor.fetchone()[0]
         current_is_ready = not current_is_ready
+
         self.cursor.execute("UPDATE admins_data SET admin_is_ready = ? WHERE admin_id = ?", (current_is_ready, admin_id))
         self.connection.commit()
+
+    def get_admin_is_ready(self, admin_id):
+        self.cursor.execute("SELECT admin_is_ready FROM admins_data WHERE admin_id = ?", (admin_id,))
+
+        current_is_ready = self.cursor.fetchone()[0]
+        return current_is_ready
 
 admin_db_manager = AdminDatabaseManager()
 _fill_admin_db()

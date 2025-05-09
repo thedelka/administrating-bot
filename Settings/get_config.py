@@ -14,6 +14,7 @@ class ConfigManager:
 
 
     def get_admins_list(self) -> list[Admin]:
+        """Usable only for reading, not writing"""
         admins_list = [Admin(admin_info[0], admin_info[1]) for admin_info in self.get_config("ADMIN", 'admins')]  # list of Admin-objects
         return admins_list
 

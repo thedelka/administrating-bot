@@ -1,13 +1,12 @@
-from BotEntities.admin import Admin
 from Keyboards.menu_keyboard import menu_pages_builders
 from Settings.get_config import config_manager
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import Router, Bot
-from Database.users_data_db import db_manager
+from Database.users_data_db import user_db_manager
 from BotEntities.user import User
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
-
+from Database.admins_data_db import admin_db_manager
 router = Router()
 
 @router.message(Command("start"))
@@ -19,14 +18,14 @@ async def start_command(message : Message):
         help_user_text = config_manager.get_config("MESSAGES", 'help_user_text')
 
         user = User(message.from_user.id, message.from_user.username)
-        db_manager.add_user(user)
+        user_db_manager.add_user(user)
 
         await message.answer(start_text, reply_markup=menu_pages_builders[0])
         await message.answer(help_user_text)
 
     else:
         start_text = config_manager.get_config("MESSAGES", "start_text_admin")
-        await message.answer(start_text, reply_markup=get_work_status_kb(config_manager.get_admin(message.from_user.id).is_ready))
+        await message.answer(start_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(message.from_user.id)))
 
 
 async def send_message_according_to_type(target_id, bot : Bot, message_data : dict, user_id =  None):
@@ -46,6 +45,6 @@ async def send_message_according_to_type(target_id, bot : Bot, message_data : di
         if message_data["content_type"] == attribute:
 
             if user_id:
-                db_manager.add_message_to_user_message_history(user_id, message_data)
+                user_db_manager.add_message_to_user_message_history(user_id, message_data)
 
             return await send_method(bot, target_id)

@@ -6,14 +6,16 @@ from aiogram.types import Message, CallbackQuery
 from States.admin_state import AdminState
 from aiogram import Router, Bot, F
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
-from Database.users_data_db import db_manager, serialize_message
+from Database.users_data_db import user_db_manager, serialize_message
+from Database.admins_data_db import admin_db_manager
 from Handlers.commands_handler import send_message_according_to_type
 
 router = Router()
 
 async def remove_user_id(user_id, callback : CallbackQuery, state : FSMContext, bot : Bot):
-    if user_id in [admin.admin_user_id for admin in config_manager.admins_list]:
-        config_manager.get_admin(callback.from_user.id).texting_user_id.remove(user_id)
+
+    if user_id in config_manager.get_admins_ids_list():
+        admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id, user_id, True)
     else:
         print("ТАКОГО ЮЗЕРА И ТАК НЕ БЫЛО!")
 
@@ -34,11 +36,11 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
 
     await bot.send_message(user_id, operator_found_text)
 
-    config_manager.get_admin(callback.from_user.id).texting_user_id.append(user_id)
+    admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id, user_id)
 
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
-    print(f"Список обрабатывающихся админом пользователей: {config_manager.get_admin(callback.from_user.id).texting_user_id}")
+    print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")
 
 
 @router.message(StateFilter(AdminState.texting))
@@ -55,7 +57,7 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
     user_id = callback.data.split("_")[-1]
     await callback.answer()
 
-    message_history = db_manager.get_user_messages(user_id)
+    message_history = user_db_manager.get_user_messages(user_id)
 
     archive_messages = []
     archive_messages_text = await callback.message.answer("⏬Архивные сообщения⏬")
@@ -91,7 +93,8 @@ async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContex
     close_dialogue_text = config_manager.get_config("MESSAGES", "close_dialogue_text")
 
     await bot.send_message(user_id, close_dialogue_text)
-    db_manager.clear_user_message_history(user_id)
+    user_db_manager.clear_user_message_history(user_id)
 
     await remove_user_id(user_id, callback, state, bot)
-    print(f"[DEBUG] Список обрабатывающихся админов пользователей: {config_manager.get_admin(callback.from_user.id).texting_user_id}")
+
+    print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")

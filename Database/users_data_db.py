@@ -92,5 +92,4 @@ class UserDatabaseManager:
         self.cursor.execute("UPDATE users_data SET user_messages = NULL WHERE user_id = ?", (user_id,))
         self.connection.commit()
 
-
-db_manager = UserDatabaseManager()
+user_db_manager = UserDatabaseManager()
