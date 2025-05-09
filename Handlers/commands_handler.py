@@ -1,3 +1,4 @@
+from BotEntities.admin import Admin
 from Keyboards.menu_keyboard import menu_pages_builders
 from Settings.get_config import config_manager
 from aiogram.filters import Command
