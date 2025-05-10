@@ -1,7 +1,9 @@
-import json
-import sqlite3, os
+import sqlite3, os, json
+
 from aiogram.types import Message
+
 from BotEntities.user import User
+
 
 def serialize_message(new_message : Message) -> dict:
     """Transforms message into dict with message information and returns it"""
@@ -22,6 +24,7 @@ def serialize_message(new_message : Message) -> dict:
 
     return message_data
 
+
 class UserDatabaseManager:
 
     def __init__(self, db_name : str = "users_data.db"):
@@ -29,7 +32,6 @@ class UserDatabaseManager:
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
         self._create_table()
-
 
     def _create_table(self) -> None:
         self.cursor.execute("""
@@ -40,7 +42,6 @@ class UserDatabaseManager:
         )""")
 
         self.connection.commit()
-
 
     def add_user(self, user : User):
         """Add user if user_id is not already in database"""
@@ -54,7 +55,6 @@ class UserDatabaseManager:
             self.cursor.execute("INSERT INTO users_data (user_id, user_name, user_messages) VALUES (?, ?, ?)",
                                 (user.user_id, user.user_name, json_data))
             self.connection.commit()
-
 
     def get_user_messages(self, user_id):
         """Get user messages history as list of every message information (list of dicts)"""
@@ -90,9 +90,9 @@ class UserDatabaseManager:
         except AttributeError as e:
             print(f"[ERROR]: {e}")
 
-
     def clear_user_message_history(self, user_id):
         self.cursor.execute("UPDATE users_data SET user_messages = NULL WHERE user_id = ?", (user_id,))
         self.connection.commit()
+
 
 user_db_manager = UserDatabaseManager()
