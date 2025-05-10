@@ -45,7 +45,7 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
     print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")
 
 
-@router.message(StateFilter(AdminState.texting), F.text != "/em_shutdown")
+@router.message(StateFilter(AdminState.texting))
 async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 
     data = await state.get_data()
