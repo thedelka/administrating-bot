@@ -28,7 +28,7 @@ for _ in range(max_menu_pages):
 
 if last_page_buttons_count > 0:
 
-    last_buttons = menu_buttons_texts[-last_page_buttons_count:] #get last buttons of list
+    last_buttons = menu_buttons_texts[-last_page_buttons_count:]
 
     last_page_buttons_dict = {}
 
