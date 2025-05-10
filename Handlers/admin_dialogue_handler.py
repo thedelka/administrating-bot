@@ -22,7 +22,7 @@ async def remove_user_id(user_id, callback : CallbackQuery, state : FSMContext, 
     if user_id in config_manager.get_admins_ids_list():
         admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id, user_id, True)
     else:
-        print("ТАКОГО ЮЗЕРА И ТАК НЕ БЫЛО!")
+        print("[DEBUG] Такого юзера и так не было, нечего удалять из списка.")
 
     await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
     await state.clear()
@@ -30,6 +30,7 @@ async def remove_user_id(user_id, callback : CallbackQuery, state : FSMContext, 
     storage = state.storage
     target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
     await storage.set_state(key=target_key, state = None)
+
     print(f"[DEBUG] Состояние пользователя: {await storage.get_state(key=target_key)}")
 
 @router.callback_query(F.data.startswith("ANSWER"))

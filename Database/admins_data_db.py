@@ -17,7 +17,6 @@ def _fill_admin_db(admins_list=config_manager.get_admins_list()):
 
 class AdminDatabaseManager:
 
-
     def __init__(self, db_name : str = "admins_data.db"):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
         self.connection = sqlite3.connect(self.db_path)
