@@ -40,8 +40,6 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
 
     await bot.send_message(user_id, operator_found_text)
 
-    admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id, user_id)
-#TODO: не добавляются пользователи
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
     print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")

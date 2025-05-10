@@ -31,6 +31,8 @@ async def send_type_message(message: Message, bot : Bot):
     await bot.send_message(admin_with_lowest_queries_id, f"❗ НОВОЕ СООБЩЕНИЕ ОТ ПОЛЬЗОВАТЕЛЯ {message.from_user.id} "
                                              f"\nДата отправки по UTC+3: {time_now}", reply_markup=create_user_message_keyboard(message.from_user.id))
 
+    admin_db_manager.admin_texting_user_id_operation(admin_with_lowest_queries_id, user_id)
+
     await send_message_according_to_type(admin_with_lowest_queries_id, bot, serialize_message(message), user_id)
 
     print(f"[DEBUG] Сообщения пользователя: {user_db_manager.get_user_messages(user_id)}")
@@ -44,6 +46,7 @@ async def send_user_message(message : Message, bot : Bot, state : FSMContext):
             "Ваше сообщение успешно отправлено. Пожалуйста, подождите, пока мы найдем свободных операторов...")
 
         await state.set_state(DialogueState.dialogue_open)
+
 
         print(f'[DEBUG] Текуще состояние диалога у юзера: {await state.get_state()}')
 

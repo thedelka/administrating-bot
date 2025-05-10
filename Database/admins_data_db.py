@@ -66,7 +66,10 @@ class AdminDatabaseManager:
         user_id form texting_user_id if remove = True and user_id not None"""
         self.cursor.execute("SELECT admin_texting_user_id FROM admins_data WHERE admin_id = ?", (admin_id,))
         row = self.cursor.fetchone()
-        json_data : list = json.loads(row[0]) if row else []
+        if row and row[0]:
+            json_data : list = json.loads(row[0])
+        else:
+            json_data = []
 
         try:
             if user_id:

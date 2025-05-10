@@ -1,17 +1,38 @@
 from aiogram import Router, types, F
 
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
+from Keyboards.emergency_shudown_keyboard import em_shut_kb_builder
 
 from Database.admins_data_db import admin_db_manager
+
+from Settings.get_config import config_manager
 
 router = Router()
 
 @router.message(F.text.in_(["Готов к работе", "Взять паузу"]))
 async def change_admin_work_status(message: types.Message):
-    admin_db_manager.change_admin_is_ready(message.from_user.id)
+    admin_id = message.from_user.id
 
-    await message.answer("✅Вы готовы к работе. Ожидайте обращений пользователей." if admin_db_manager.get_admin_is_ready(message.from_user.id)
-                         else "🔚Вы не готовы к работе. К вам не будут поступать обращения пользователей.",
-                         reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(message.from_user.id)))
+    if admin_db_manager.get_admin_is_ready(admin_id):
+
+        if admin_db_manager.admin_texting_user_id_operation(admin_id):
+            await send_warning_message(message)
+            return None
+
+        else:
+            work_status_text = config_manager.get_config("MESSAGES", "work_status_text_not_ready")
+            admin_db_manager.change_admin_is_ready(message.from_user.id)
+    else:
+        work_status_text = config_manager.get_config("MESSAGES", "work_status_text_is_ready")
+        admin_db_manager.change_admin_is_ready(message.from_user.id)
+
+    await message.answer(text=work_status_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
 
     print(f"[DEBUG] Состояние админа: {admin_db_manager.get_admin_is_ready(message.from_user.id)}")
+
+async def send_warning_message(message : types.Message):
+    await message.answer("❗Вы пытаетесь взять паузу, но у вас еще есть незавершённые диалоги с пользователями❗\n\n"
+                         "Если вы нажмете \"✅Подтвердить\", все ваши обращения пользователей будут переведены на другого оператора❗",
+                         reply_markup=em_shut_kb_builder.as_markup())
+
+
