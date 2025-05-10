@@ -2,7 +2,6 @@ import json, sqlite3, os
 from BotEntities.admin import Admin
 from Settings.get_config import config_manager
 
-
 def _fill_admin_db(admins_list=config_manager.get_admins_list()):
     current_admin_ids = {admin.admin_user_id for admin in admins_list}
 
@@ -51,12 +50,16 @@ class AdminDatabaseManager:
         self.cursor.execute("DELETE FROM admins_data WHERE admin_id = ?", (admin_id,))
         self.connection.commit()
 
-    def print_db(self):
+    def get_db(self):
         self.cursor.execute("SELECT * FROM admins_data")
         data = self.cursor.fetchall()
 
         print(data)
         return data
+
+    def clear_admin_texting_user_id(self, admin_id):
+        self.cursor.execute("UPDATE admins_data SET admin_texting_user_id = NULL WHERE admin_id = ?", (admin_id,))
+        self.connection.commit()
 
     def admin_texting_user_id_operation(self, admin_id, user_id= None, remove = False):
         """Returns admin_texting_user_id if user_id = None, updates admin_texting_user_id if user_id not None, removes
@@ -97,4 +100,4 @@ class AdminDatabaseManager:
 admin_db_manager = AdminDatabaseManager()
 
 _fill_admin_db()
-admin_db_manager.print_db()
+admin_db_manager.get_db()

@@ -7,6 +7,7 @@ from Database.users_data_db import user_db_manager
 from BotEntities.user import User
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
 from Database.admins_data_db import admin_db_manager
+
 router = Router()
 
 @router.message(Command("start"))
@@ -26,7 +27,6 @@ async def start_command(message : Message):
     else:
         start_text = config_manager.get_config("MESSAGES", "start_text_admin")
         await message.answer(start_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(message.from_user.id)))
-
 
 async def send_message_according_to_type(target_id, bot : Bot, message_data : dict, user_id =  None):
     """Check type of message and SEND MESSAGE ACCORDING TO its TYPE"""

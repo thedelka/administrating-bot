@@ -69,7 +69,10 @@ class UserDatabaseManager:
         except TypeError as e:
             print(f"[ERROR] Скорее всего, используется айди админа: {e}")
 
-
+    def get_username(self, user_id):
+        self.cursor.execute("SELECT user_name FROM users_data WHERE user_id = ?", (user_id, ))
+        user_name = self.cursor.fetchone()[0]
+        return user_name
 
     def add_message_to_user_message_history(self, user_id, new_message_data):
         try:

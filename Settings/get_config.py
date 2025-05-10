@@ -1,6 +1,7 @@
 """Get config.txt info to use it anywhere"""
 import configparser, os, json
 from BotEntities.admin import Admin
+from typing import Optional
 
 class ConfigManager:
     def __init__(self):
@@ -25,5 +26,18 @@ class ConfigManager:
         for admin_info in self.admins_list:
             if admin_info.admin_user_id == admin_id:
                 return admin_info
+
+    def get_free_admin(self, admins: list[tuple]) -> Optional[int]:
+        available_admins = [admin for admin in admins if admin[4]]
+
+        if not available_admins:
+            return None
+
+        min_queries = min(admin[3] for admin in available_admins)
+
+        min_queries_admins = [admin for admin in available_admins if admin[3] == min_queries]
+
+        print(min_queries_admins[0][0])
+        return min_queries_admins[0][0]
 
 config_manager = ConfigManager()
