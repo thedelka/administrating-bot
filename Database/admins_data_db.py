@@ -1,4 +1,4 @@
-import json, sqlite3, os, logging
+import json, sqlite3, os
 from BotEntities.admin import Admin
 from Settings.get_config import config_manager
 
@@ -103,6 +103,3 @@ class AdminDatabaseManager:
 
 admin_db_manager = AdminDatabaseManager()
 _fill_admin_db()
-
-logger = logging.getLogger(__name__)
-logger.debug(admin_db_manager.get_db())

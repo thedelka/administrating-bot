@@ -18,9 +18,7 @@ TOKEN = config_manager.get_config('BOT_CONSTANTS', 'TOKEN')
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
-logging.basicConfig(level=logging.DEBUG,
-                    format="%(levelname)s | %(message)s | %(funcName)s | %(filename)s",
-                    handlers=[logging.StreamHandler()])
+logging.basicConfig(level=logging.INFO)
 
 dp.include_routers(commands_handler_router, menu_handler_router, start_dialogue_handler_router,
                    dialogue_handler_router, admin_change_work_readiness_router, emergency_shutdown_handler_router)
@@ -30,9 +28,7 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
-
     try:
         run(main())
-
     except KeyboardInterrupt:
         print("Ошибка клавиатуры. Ничего страшного!")
