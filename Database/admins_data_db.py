@@ -53,7 +53,6 @@ class AdminDatabaseManager:
         self.cursor.execute("SELECT * FROM admins_data")
         data = self.cursor.fetchall()
 
-        print(data)
         return data
 
     def clear_admin_texting_user_id(self, admin_id):
@@ -63,13 +62,14 @@ class AdminDatabaseManager:
     def admin_texting_user_id_operation(self, admin_id, user_id= None, remove = False):
         """Returns admin_texting_user_id if user_id = None, updates admin_texting_user_id if user_id not None, removes
         user_id form texting_user_id if remove = True and user_id not None"""
+
         self.cursor.execute("SELECT admin_texting_user_id FROM admins_data WHERE admin_id = ?", (admin_id,))
         row = self.cursor.fetchone()
         if row and row[0]:
             json_data : list = json.loads(row[0])
         else:
             json_data = []
-
+        print(f"[DEBUG_ATUIO] json_data ({admin_id}): {json_data}")
         try:
             if user_id:
                 json_data.remove(user_id) if remove else json_data.append(user_id)
@@ -102,4 +102,4 @@ class AdminDatabaseManager:
 admin_db_manager = AdminDatabaseManager()
 
 _fill_admin_db()
-admin_db_manager.get_db()
+print(admin_db_manager.get_db())

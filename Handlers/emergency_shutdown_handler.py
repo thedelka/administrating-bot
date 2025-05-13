@@ -12,7 +12,7 @@ router = Router()
 
 @router.callback_query(F.data == "CONFIRM_EM_SHUTDOWN")
 async def confirm_shutdown(callback : CallbackQuery, bot : Bot):
-    admin_id = callback.from_user.id
+    admin_id = callback.message.from_user.id
     admin_db_manager.change_admin_is_ready(admin_id)
 
     user_ids_to_remove = admin_db_manager.admin_texting_user_id_operation(admin_id) #получение айди юзеров админа, нажавшего на кнопку

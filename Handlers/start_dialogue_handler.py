@@ -34,6 +34,7 @@ async def send_type_message(message: Message, bot : Bot, target_admin_id):
     await send_message_according_to_type(target_admin_id, bot, serialize_message(message), user_id)
 
     print(f"[DEBUG] Сообщения пользователя: {user_db_manager.get_user_messages(user_id)}")
+    print(f"[DEBUG_DB_SEND_TYPE_MESSAGE] {admin_db_manager.get_db()}")
 
 
 @router.message(StateFilter(None), F.from_user.id.not_in(config_manager.get_admins_ids_list()))

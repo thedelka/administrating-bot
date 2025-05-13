@@ -17,10 +17,10 @@ from Handlers.commands_handler import send_message_according_to_type
 
 router = Router()
 
-async def remove_user_id(user_id, callback : CallbackQuery, state : FSMContext, bot : Bot):
-
-    if user_id in config_manager.get_admins_ids_list():
-        admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id, user_id, True)
+async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : FSMContext, bot : Bot):
+    user_id = int(user_id)
+    if user_id in admin_db_manager.admin_texting_user_id_operation(admin_id):
+        admin_db_manager.admin_texting_user_id_operation(admin_id, user_id, True)
     else:
         print("[DEBUG] Такого юзера и так не было, нечего удалять из списка.")
 
@@ -32,6 +32,7 @@ async def remove_user_id(user_id, callback : CallbackQuery, state : FSMContext, 
     await storage.set_state(key=target_key, state = None)
 
     print(f"[DEBUG] Состояние пользователя: {await storage.get_state(key=target_key)}")
+    print(f"[DEBUG_DB_REMOVE_USER_ID] {admin_db_manager.get_db()}")
 
 @router.callback_query(F.data.startswith("ANSWER"))
 async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bot):
@@ -43,7 +44,7 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
 
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
-    print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")
+    print(f"[DEBUG_DB_ANSWER] {admin_db_manager.get_db()}")
 
 
 @router.message(StateFilter(AdminState.texting))
@@ -57,7 +58,7 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
 async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
-    user_id = callback.data.split("_")[-1]
+    user_id = int(callback.data.split("_")[-1])
     await callback.answer()
 
     message_history = user_db_manager.get_user_messages(user_id)
@@ -92,12 +93,10 @@ async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
 async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
     user_id = callback.data.split("_")[-1]
-
+    admin_id = callback.from_user.id
     close_dialogue_text = config_manager.get_config("MESSAGES", "close_dialogue_text")
 
     await bot.send_message(user_id, close_dialogue_text)
     user_db_manager.clear_user_message_history(user_id)
 
-    await remove_user_id(user_id, callback, state, bot)
-
-    print(f"Список обрабатывающихся админом пользователей: {admin_db_manager.admin_texting_user_id_operation(callback.message.from_user.id)}")
+    await remove_user_id(user_id, admin_id, callback, state, bot)

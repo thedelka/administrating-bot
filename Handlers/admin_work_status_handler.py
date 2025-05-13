@@ -1,5 +1,6 @@
 from aiogram import Router, types, F
 
+from BotEntities.admin import Admin
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
 from Keyboards.emergency_shudown_keyboard import em_shut_kb_builder
 
@@ -12,7 +13,7 @@ router = Router()
 @router.message(F.text.in_(["Готов к работе", "Взять паузу"]))
 async def change_admin_work_status(message: types.Message):
     admin_id = message.from_user.id
-
+    print(f"У админа {admin_id} сейчас {admin_db_manager.admin_texting_user_id_operation(admin_id)} пользователей")
     if admin_db_manager.get_admin_is_ready(admin_id):
 
         if admin_db_manager.admin_texting_user_id_operation(admin_id):
@@ -21,14 +22,14 @@ async def change_admin_work_status(message: types.Message):
 
         else:
             work_status_text = config_manager.get_config("MESSAGES", "work_status_text_not_ready")
-            admin_db_manager.change_admin_is_ready(message.from_user.id)
+            admin_db_manager.change_admin_is_ready(admin_id)
     else:
         work_status_text = config_manager.get_config("MESSAGES", "work_status_text_is_ready")
-        admin_db_manager.change_admin_is_ready(message.from_user.id)
+        admin_db_manager.change_admin_is_ready(admin_id)
 
     await message.answer(text=work_status_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
 
-    print(f"[DEBUG] Состояние админа: {admin_db_manager.get_admin_is_ready(message.from_user.id)}")
+    print(f"[DEBUG] Состояние админа: {admin_db_manager.get_admin_is_ready(admin_id)}")
 
 async def send_warning_message(message : types.Message):
     await message.answer("❗Вы пытаетесь взять паузу, но у вас еще есть незавершённые диалоги с пользователями❗\n\n"
