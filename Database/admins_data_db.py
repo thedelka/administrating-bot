@@ -65,11 +65,12 @@ class AdminDatabaseManager:
 
         self.cursor.execute("SELECT admin_texting_user_id FROM admins_data WHERE admin_id = ?", (admin_id,))
         row = self.cursor.fetchone()
+
         if row and row[0]:
             json_data : list = json.loads(row[0])
         else:
             json_data = []
-        print(f"[DEBUG_ATUIO] json_data ({admin_id}): {json_data}")
+
         try:
             if user_id:
                 json_data.remove(user_id) if remove else json_data.append(user_id)
@@ -86,8 +87,9 @@ class AdminDatabaseManager:
     def change_admin_is_ready(self, admin_id):
         """Changes admin_is_ready to opposite value"""
         self.cursor.execute("SELECT admin_is_ready FROM admins_data WHERE admin_id = ?", (admin_id,))
+        data = self.cursor.fetchone()
 
-        current_is_ready = self.cursor.fetchone()[0]
+        current_is_ready = data[0]
         current_is_ready = not current_is_ready
 
         self.cursor.execute("UPDATE admins_data SET admin_is_ready = ? WHERE admin_id = ?", (current_is_ready, admin_id))

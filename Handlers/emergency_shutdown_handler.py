@@ -1,4 +1,4 @@
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
 from aiogram import F, Router, Bot
 
 from Settings.get_config import config_manager
@@ -6,20 +6,23 @@ from Settings.get_config import config_manager
 from Database.admins_data_db import admin_db_manager
 from Database.users_data_db import user_db_manager
 
+from Keyboards.admin_work_status_keyboard import get_work_status_kb
+
 from asyncio import sleep
 
 router = Router()
 
 @router.callback_query(F.data == "CONFIRM_EM_SHUTDOWN")
 async def confirm_shutdown(callback : CallbackQuery, bot : Bot):
-    admin_id = callback.message.from_user.id
+    admin_id = callback.from_user.id
     admin_db_manager.change_admin_is_ready(admin_id)
 
-    user_ids_to_remove = admin_db_manager.admin_texting_user_id_operation(admin_id) #получение айди юзеров админа, нажавшего на кнопку
+    user_ids_to_remove = admin_db_manager.admin_texting_user_id_operation(admin_id)
     print(f"[DEBUG_EM] Список юзеров админа, нажавшего на паузу: {user_ids_to_remove}")
 
     await callback.message.answer("✅Экстренное перенаправление пользователей подтверждено. Все ваши пользователи:\n\n"
-                                  f"{user_ids_to_remove}\n\nбыли переведены на свободного оператора.")
+                                  f"{user_ids_to_remove}\n\nбыли переведены на свободного оператора.",
+                                  reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
     await callback.message.delete()
 
     free_admin_id = config_manager.get_free_admin(admin_db_manager.get_db())
