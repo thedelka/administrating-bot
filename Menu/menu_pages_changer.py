@@ -8,7 +8,7 @@ def get_current_menu_page():
     return current_menu_page
 
 def increase_current_menu_page():
-    global current_menu_page,max_menu_pages
+    global current_menu_page
 
     if current_menu_page < max_menu_pages:
         current_menu_page += 1
@@ -18,7 +18,7 @@ def increase_current_menu_page():
 
 
 def decrease_current_menu_page():
-    global current_menu_page, max_menu_pages
+    global current_menu_page
 
     if current_menu_page > 1:
         current_menu_page -= 1

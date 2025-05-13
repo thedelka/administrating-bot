@@ -1,6 +1,5 @@
 from aiogram import Router, types, F
 
-from BotEntities.admin import Admin
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
 from Keyboards.emergency_shudown_keyboard import em_shut_kb_builder
 
@@ -14,18 +13,16 @@ router = Router()
 async def change_admin_work_status(message: types.Message):
     admin_id = message.from_user.id
     print(f"У админа {admin_id} сейчас {admin_db_manager.admin_texting_user_id_operation(admin_id)} пользователей")
-    if admin_db_manager.get_admin_is_ready(admin_id):
+    current_status = admin_db_manager.get_admin_is_ready(admin_id)
+    active_chats = admin_db_manager.admin_texting_user_id_operation(admin_id)
 
-        if admin_db_manager.admin_texting_user_id_operation(admin_id):
-            await send_warning_message(message)
-            return None
+    if current_status and active_chats:
+        return await send_warning_message(message)
 
-        else:
-            work_status_text = config_manager.get_config("MESSAGES", "work_status_text_not_ready")
-            admin_db_manager.change_admin_is_ready(admin_id)
-    else:
-        work_status_text = config_manager.get_config("MESSAGES", "work_status_text_is_ready")
-        admin_db_manager.change_admin_is_ready(admin_id)
+    work_status_text = (config_manager.get_config("MESSAGES", "work_status_text_not_ready") if current_status
+                        else config_manager.get_config("MESSAGES", "work_status_text_is_ready"))
+
+    admin_db_manager.change_admin_is_ready(admin_id)
 
     await message.answer(text=work_status_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
 

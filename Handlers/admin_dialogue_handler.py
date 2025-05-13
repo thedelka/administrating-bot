@@ -6,6 +6,8 @@ from aiogram import Router, Bot, F
 
 from Settings.get_config import config_manager
 
+import logging
+
 from States.admin_state import AdminState
 
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
@@ -15,6 +17,7 @@ from Database.admins_data_db import admin_db_manager
 
 from Handlers.commands_handler import send_message_according_to_type
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : FSMContext, bot : Bot):
@@ -29,6 +32,7 @@ async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : F
         storage = state.storage
         target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
         await storage.set_state(key=target_key, state=None)
+
         print(f"[DEBUG] Состояние пользователя: {await storage.get_state(key=target_key)}")
 
     else:
@@ -86,14 +90,13 @@ async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, 
         try:
             await bot.delete_messages(admin_chat_id, archive_messages)
         except Exception as e:
-
             print(f"[ERROR] Ошибка при удалении сообщений: {e}")
-            await callback.answer("[ERROR] ❌ Не удалось удалить часть сообщений", show_alert=True)
 
     await callback.message.delete()
 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
 async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
+
     user_id = callback.data.split("_")[-1]
     admin_id = callback.from_user.id
     close_dialogue_text = config_manager.get_config("MESSAGES", "close_dialogue_text")
