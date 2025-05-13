@@ -19,19 +19,21 @@ router = Router()
 
 async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : FSMContext, bot : Bot):
     user_id = int(user_id)
+
     if user_id in admin_db_manager.admin_texting_user_id_operation(admin_id):
         admin_db_manager.admin_texting_user_id_operation(admin_id, user_id, True)
+
+        await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+        await state.clear()
+
+        storage = state.storage
+        target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
+        await storage.set_state(key=target_key, state=None)
+        print(f"[DEBUG] Состояние пользователя: {await storage.get_state(key=target_key)}")
+
     else:
         print("[DEBUG] Такого юзера и так не было, нечего удалять из списка.")
 
-    await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
-    await state.clear()
-
-    storage = state.storage
-    target_key  = StorageKey(chat_id=int(user_id), user_id=int(user_id), bot_id = bot.id)
-    await storage.set_state(key=target_key, state = None)
-
-    print(f"[DEBUG] Состояние пользователя: {await storage.get_state(key=target_key)}")
     print(f"[DEBUG_DB_REMOVE_USER_ID] {admin_db_manager.get_db()}")
 
 @router.callback_query(F.data.startswith("ANSWER"))
