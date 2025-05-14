@@ -20,7 +20,12 @@ from Handlers.commands_handler import send_message_according_to_type
 logger = logging.getLogger(__name__)
 router = Router()
 
-async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : FSMContext, bot : Bot):
+async def remove_user_id(user_id,
+                         admin_id,
+                         callback : CallbackQuery,
+                         state : FSMContext,
+                         bot : Bot):
+
     user_id = int(user_id)
 
     if user_id in admin_db_manager.admin_texting_user_id_operation(admin_id):
@@ -41,7 +46,9 @@ async def remove_user_id(user_id, admin_id,  callback : CallbackQuery, state : F
     print(f"[DEBUG_DB_REMOVE_USER_ID] {admin_db_manager.get_db()}")
 
 @router.callback_query(F.data.startswith("ANSWER"))
-async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bot):
+async def start_messaging(callback : CallbackQuery,
+                          state : FSMContext,
+                          bot : Bot):
     await callback.answer("Ваша переписка с пользователем начата!")
     user_id = callback.data.split("_")[-1]
     operator_found_text = config_manager.get_config("MESSAGES", "found_not_taken_admin_text")
@@ -54,7 +61,9 @@ async def start_messaging(callback : CallbackQuery, state : FSMContext, bot : Bo
 
 
 @router.message(StateFilter(AdminState.texting))
-async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
+async def admin_answer_user(message : Message,
+                            bot : Bot,
+                            state : FSMContext):
 
     data = await state.get_data()
     current_user_id = data["current_user_id"]
@@ -63,7 +72,9 @@ async def admin_answer_user(message : Message, bot : Bot, state : FSMContext):
 
 
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
-async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
+async def get_dialogue_history(callback : CallbackQuery,
+                               state : FSMContext,
+                               bot : Bot):
     user_id = int(callback.data.split("_")[-1])
     await callback.answer()
 
@@ -81,7 +92,9 @@ async def get_dialogue_history(callback : CallbackQuery, state : FSMContext, bot
     await state.set_data({"temp_mess_history": archive_messages})
 
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
-async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, bot : Bot):
+async def remove_dialogue_history(callback : CallbackQuery,
+                                  state : FSMContext,
+                                  bot : Bot):
     data = await state.get_data()
     archive_messages = data.get("temp_mess_history", [])
     admin_chat_id = callback.message.chat.id
@@ -95,7 +108,9 @@ async def remove_dialogue_history(callback : CallbackQuery, state : FSMContext, 
     await callback.message.delete()
 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
-async def close_dialogue(callback : CallbackQuery , bot : Bot, state : FSMContext):
+async def close_dialogue(callback : CallbackQuery ,
+                         bot : Bot,
+                         state : FSMContext):
 
     user_id = callback.data.split("_")[-1]
     admin_id = callback.from_user.id

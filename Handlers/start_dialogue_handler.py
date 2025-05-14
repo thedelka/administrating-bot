@@ -1,4 +1,5 @@
 import datetime
+
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.filters import StateFilter
@@ -19,7 +20,9 @@ from Handlers.commands_handler import send_message_according_to_type
 
 router = Router()
 
-async def send_type_message(message: Message, bot : Bot, target_admin_id):
+async def send_type_message(message: Message,
+                            bot : Bot,
+                            target_admin_id):
     """Send user message to an admin"""
     tz = timezone(config_manager.get_config("BOT_CONSTANTS", "timezone"))
     time_now = datetime.datetime.now(tz).strftime("%H:%M:%S")
@@ -38,7 +41,9 @@ async def send_type_message(message: Message, bot : Bot, target_admin_id):
 
 
 @router.message(StateFilter(None), F.from_user.id.not_in(config_manager.get_admins_ids_list()))
-async def send_user_message(message : Message, bot : Bot, state : FSMContext):
+async def send_user_message(message : Message,
+                            bot : Bot,
+                            state : FSMContext):
     admin_with_lowest_queries_id = config_manager.get_free_admin(admin_db_manager.get_db())
 
     await send_type_message(message, bot, admin_with_lowest_queries_id)

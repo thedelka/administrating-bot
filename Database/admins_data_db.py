@@ -1,4 +1,6 @@
-import json, sqlite3, os
+import json
+import sqlite3
+import os
 from BotEntities.admin import Admin
 from Settings.get_config import config_manager
 
@@ -85,7 +87,6 @@ class AdminDatabaseManager:
         return json_data
 
     def change_admin_is_ready(self, admin_id):
-        """Changes admin_is_ready to opposite value"""
         self.cursor.execute("SELECT admin_is_ready FROM admins_data WHERE admin_id = ?", (admin_id,))
         data = self.cursor.fetchone()
 
@@ -103,3 +104,4 @@ class AdminDatabaseManager:
 
 admin_db_manager = AdminDatabaseManager()
 _fill_admin_db()
+print(admin_db_manager.get_db())

@@ -12,7 +12,9 @@ router = Router()
 @router.message(F.text.in_(["Готов к работе", "Взять паузу"]))
 async def change_admin_work_status(message: types.Message):
     admin_id = message.from_user.id
+
     print(f"У админа {admin_id} сейчас {admin_db_manager.admin_texting_user_id_operation(admin_id)} пользователей")
+
     current_status = admin_db_manager.get_admin_is_ready(admin_id)
     active_chats = admin_db_manager.admin_texting_user_id_operation(admin_id)
 

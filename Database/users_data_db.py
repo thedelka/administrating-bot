@@ -1,4 +1,6 @@
-import sqlite3, os, json
+import sqlite3
+import os
+import json
 
 from aiogram.types import Message
 
@@ -59,7 +61,7 @@ class UserDatabaseManager:
     def get_user_messages(self, user_id):
         """Get user messages history as list of every message information (list of dicts)"""
         try:
-            self.cursor.execute(f"SELECT user_messages FROM users_data WHERE user_id = ?",
+            self.cursor.execute("SELECT user_messages FROM users_data WHERE user_id = ?",
                                 (user_id,))
             user_messages_value = self.cursor.fetchone()
 

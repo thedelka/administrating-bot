@@ -1,5 +1,7 @@
 """Get config.txt info to use it anywhere"""
-import configparser, os, json
+import configparser
+import os
+import json
 
 from BotEntities.admin import Admin
 

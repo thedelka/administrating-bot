@@ -6,6 +6,7 @@ _kb_admin_ready = [
 _kb_admin_not_ready =[
         [KeyboardButton(text="Взять паузу")]
     ]
+
 result_keyboard_ready = ReplyKeyboardMarkup(keyboard= _kb_admin_ready, resize_keyboard=True)
 result_keyboard_not_ready = ReplyKeyboardMarkup(keyboard= _kb_admin_not_ready, resize_keyboard=True)
 
