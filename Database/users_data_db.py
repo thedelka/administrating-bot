@@ -1,9 +1,7 @@
-import sqlite3
 import os
 import json
-
+import sqlite3
 from aiogram.types import Message
-
 from BotEntities.user import User
 
 

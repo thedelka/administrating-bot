@@ -1,5 +1,4 @@
 from Menu.menu import Menu
-
 from Settings.get_config import config_manager
 
 menu_buttons_texts = list(config_manager.get_config("HELP_MENU_SETTINGS", "buttons").keys())

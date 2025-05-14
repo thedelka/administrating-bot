@@ -1,23 +1,15 @@
-import logging
-
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, Bot, F
-
 from Settings.get_config import config_manager
-
 from States.admin_state import AdminState
-
 from Keyboards.clean_message_history_keyboard import create_clean_history_keyboard
-
 from Database.users_data_db import user_db_manager, serialize_message
 from Database.admins_data_db import admin_db_manager
-
 from Handlers.commands_handler import send_message_according_to_type
 
-logger = logging.getLogger(__name__)
 router = Router()
 
 async def remove_user_id(user_id,

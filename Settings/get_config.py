@@ -1,11 +1,10 @@
 """Get config.txt info to use it anywhere"""
+from typing import Optional
 import configparser
 import os
 import json
-
 from BotEntities.admin import Admin
 
-from typing import Optional
 
 class ConfigManager:
     def __init__(self):

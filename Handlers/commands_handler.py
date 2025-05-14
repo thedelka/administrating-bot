@@ -1,17 +1,12 @@
-from Keyboards.menu_keyboard import menu_pages_builders
-
-from Settings.get_config import config_manager
-
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import Router, Bot
-
+from Keyboards.menu_keyboard import menu_pages_builders
+from Keyboards.admin_work_status_keyboard import get_work_status_kb
+from Settings.get_config import config_manager
 from Database.users_data_db import user_db_manager
 from Database.admins_data_db import admin_db_manager
-
 from BotEntities.user import User
-
-from Keyboards.admin_work_status_keyboard import get_work_status_kb
 
 
 router = Router()
