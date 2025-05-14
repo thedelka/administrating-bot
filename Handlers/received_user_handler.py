@@ -1,5 +1,4 @@
 from aiogram import F, Router, Bot
-from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from Database.users_data_db import user_db_manager

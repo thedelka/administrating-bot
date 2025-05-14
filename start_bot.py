@@ -6,8 +6,6 @@ from Settings.get_config import config_manager
 
 from aiogram import Bot, Dispatcher
 
-from Database.admins_data_db import admin_db_manager
-
 from Handlers.commands_handler import router as commands_handler_router
 from Handlers.menu_handler import router as menu_handler_router
 from Handlers.start_dialogue_handler import router as start_dialogue_handler_router

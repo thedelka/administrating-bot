@@ -58,9 +58,10 @@ async def confirm_shutdown(callback : CallbackQuery,
                                text=f"{user_id} - @{user_db_manager.get_username(user_id)}",
                                reply_markup=get_show_messages_kb(user_id))
 
-        storage = state.storage
+        storage = state.storage #Ставим состояние юзеров на None, чтобы их след. сообщение отправилось полноценно, с клавой и тд
         target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
         await storage.set_state(key=target_key, state=None)
+
         print(f"[DEBUG] Состояние пользователя {user_id} : {await storage.get_state(key=target_key)}")
 
     print(f"[DEBUG_EM] Список юзеров админа, получившего юзеров: "
