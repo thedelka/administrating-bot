@@ -1,5 +1,7 @@
-from aiogram.types import CallbackQuery
 from aiogram import F, Router, Bot
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.base import StorageKey
+from aiogram.types import CallbackQuery
 
 from Settings.get_config import config_manager
 
@@ -7,6 +9,7 @@ from Database.admins_data_db import admin_db_manager
 from Database.users_data_db import user_db_manager
 
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
+from Keyboards.received_user_keyboard import get_show_messages_kb
 
 from asyncio import sleep
 
@@ -14,7 +17,8 @@ router = Router()
 
 @router.callback_query(F.data == "CONFIRM_EM_SHUTDOWN")
 async def confirm_shutdown(callback : CallbackQuery,
-                           bot : Bot):
+                           bot : Bot,
+                           state: FSMContext):
     admin_id = callback.from_user.id
     admin_db_manager.change_admin_is_ready(admin_id)
 
@@ -51,9 +55,15 @@ async def confirm_shutdown(callback : CallbackQuery,
         admin_db_manager.admin_texting_user_id_operation(free_admin_id,
                                                          user_id)
         await bot.send_message(chat_id=free_admin_id,
-                               text=f"{user_id} - @{user_db_manager.get_username(user_id)}")
+                               text=f"{user_id} - @{user_db_manager.get_username(user_id)}",
+                               reply_markup=get_show_messages_kb(user_id))
 
-        print(f"[DEBUG_EM] Список юзеров админа, получившего юзеров: "
+        storage = state.storage
+        target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
+        await storage.set_state(key=target_key, state=None)
+        print(f"[DEBUG] Состояние пользователя {user_id} : {await storage.get_state(key=target_key)}")
+
+    print(f"[DEBUG_EM] Список юзеров админа, получившего юзеров: "
               f"{admin_db_manager.admin_texting_user_id_operation(free_admin_id)}")
 
 @router.callback_query(F.data == "CANCEL_EM_SHUTDOWN")

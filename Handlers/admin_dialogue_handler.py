@@ -61,7 +61,8 @@ async def start_messaging(callback : CallbackQuery,
     print(f"[DEBUG_DB_ANSWER] {admin_db_manager.get_db()}")
 
 
-@router.message(StateFilter(AdminState.texting))
+@router.message(StateFilter(AdminState.texting),
+                ~F.text.in_(["Готов к работе", "Взять паузу"]))
 async def admin_answer_user(message : Message,
                             bot : Bot,
                             state : FSMContext):

@@ -33,7 +33,7 @@ async def send_type_message(message: Message,
                                              f"\nДата отправки по UTC+3: {time_now}",
                            reply_markup=create_user_message_keyboard(message.from_user.id))
 
-    admin_db_manager.admin_texting_user_id_operation(target_admin_id, user_id)
+    if user_id not in admin_db_manager.admin_texting_user_id_operation(target_admin_id): admin_db_manager.admin_texting_user_id_operation(target_admin_id, user_id)
 
     await send_message_according_to_type(
                                         target_admin_id,
