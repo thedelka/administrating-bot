@@ -13,7 +13,8 @@ router = Router()
 async def change_admin_work_status(message: types.Message):
     admin_id = message.from_user.id
 
-    print(f"У админа {admin_id} сейчас {admin_db_manager.admin_texting_user_id_operation(admin_id)} пользователей")
+    print(f"У админа {admin_id} сейчас "
+          f"{admin_db_manager.admin_texting_user_id_operation(admin_id)} пользователей")
 
     current_status = admin_db_manager.get_admin_is_ready(admin_id)
     active_chats = admin_db_manager.admin_texting_user_id_operation(admin_id)
@@ -26,13 +27,16 @@ async def change_admin_work_status(message: types.Message):
 
     admin_db_manager.change_admin_is_ready(admin_id)
 
-    await message.answer(text=work_status_text, reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
+    await message.answer(text=work_status_text,
+                         reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
 
     print(f"[DEBUG] Состояние админа: {admin_db_manager.get_admin_is_ready(admin_id)}")
 
 async def send_warning_message(message : types.Message):
-    await message.answer("❗Вы пытаетесь взять паузу, но у вас еще есть незавершённые диалоги с пользователями❗\n\n"
-                         "Если вы нажмете \"✅Подтвердить\", все ваши обращения пользователей будут переведены на другого оператора❗",
+    await message.answer("❗Вы пытаетесь взять паузу, но у вас еще есть "
+                         "незавершённые диалоги с пользователями❗\n\n"
+                         "Если вы нажмете \"✅Подтвердить\", "
+                         "все ваши обращения пользователей будут переведены на другого оператора❗",
                          reply_markup=em_shut_kb_builder.as_markup())
 
 
