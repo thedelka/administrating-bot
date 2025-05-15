@@ -1,7 +1,7 @@
 from Keyboards.menu_keyboard import menu_pages_builders
 
-max_menu_pages = len(menu_pages_builders)
 
+max_menu_pages = len(menu_pages_builders)
 current_menu_page = 1
 
 def get_current_menu_page():

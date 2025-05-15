@@ -1,6 +1,6 @@
 from typing import Optional
-
 from aiogram.types import Message
+
 
 class User:
     def __init__(self, user_id, user_name,

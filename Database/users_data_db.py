@@ -24,6 +24,7 @@ def serialize_message(new_message : Message) -> dict:
 
     return message_data
 
+
 class UserDatabaseManager:
 
     def __init__(self, db_name : str = "users_data.db"):

@@ -1,5 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+
 _kb_admin_ready = [
         [KeyboardButton(text="Готов к работе")]
     ]

@@ -10,6 +10,7 @@ from Database.users_data_db import user_db_manager, serialize_message
 from Database.admins_data_db import admin_db_manager
 from Handlers.commands_handler import send_message_according_to_type
 
+
 router = Router()
 
 async def remove_user_id(user_id,
@@ -52,7 +53,6 @@ async def start_messaging(callback : CallbackQuery,
     await state.set_data({"current_user_id" : user_id})
     print(f"[DEBUG_DB_ANSWER] {admin_db_manager.get_db()}")
 
-
 @router.message(StateFilter(AdminState.texting),
                 ~F.text.in_(["Готов к работе", "Взять паузу"]))
 async def admin_answer_user(message : Message,
@@ -65,7 +65,6 @@ async def admin_answer_user(message : Message,
     await send_message_according_to_type(
         current_user_id, bot, serialize_message(message)
     )
-
 
 @router.callback_query(F.data.startswith("DIALOGUE_CHECKOUT"))
 async def get_dialogue_history(callback : CallbackQuery,

@@ -4,6 +4,7 @@ import sqlite3
 from BotEntities.admin import Admin
 from Settings.get_config import config_manager
 
+
 def _fill_admin_db(admins_list=config_manager.get_admins_list()):
     current_admin_ids = {admin.admin_user_id for admin in admins_list}
 

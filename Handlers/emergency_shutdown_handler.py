@@ -9,13 +9,22 @@ from Database.users_data_db import user_db_manager
 from Keyboards.admin_work_status_keyboard import get_work_status_kb
 from Keyboards.received_user_keyboard import get_show_messages_kb
 
+
 router = Router()
 
 @router.callback_query(F.data == "CONFIRM_EM_SHUTDOWN")
 async def confirm_shutdown(callback : CallbackQuery,
                            bot : Bot,
                            state: FSMContext):
+
+    free_admin = config_manager.get_free_admin(admin_db_manager.get_db())
     admin_id = callback.from_user.id
+
+    if free_admin is None or free_admin == admin_id:
+        no_free_admins_text = config_manager.get_config("MESSAGES", "no_free_admins_for_receiving")
+        await callback.message.edit_text(no_free_admins_text)
+        return
+
     admin_db_manager.change_admin_is_ready(admin_id)
 
     user_ids_to_remove = admin_db_manager.admin_texting_user_id_operation(admin_id)
@@ -26,13 +35,12 @@ async def confirm_shutdown(callback : CallbackQuery,
         "✅Экстренное перенаправление пользователей подтверждено. "
         "Все ваши пользователи:\n\n"
         f"{user_ids_to_remove}\n\nбыли переведены на свободного оператора.",
-                                  reply_markup=get_work_status_kb(
-                                      admin_db_manager.get_admin_is_ready(admin_id))
-                                    )
+        reply_markup=get_work_status_kb(
+            admin_db_manager.get_admin_is_ready(admin_id))
+    )
 
     await callback.message.delete()
 
-    free_admin_id = config_manager.get_free_admin(admin_db_manager.get_db())
 
     admin_db_manager.clear_admin_texting_user_id(admin_id)
 
@@ -42,7 +50,7 @@ async def confirm_shutdown(callback : CallbackQuery,
     await bot.send_message(chat_id=free_admin_id,
                            text=f"❗Оператор {admin_id} совершил экстренное отключение"
                                 f" и передал вам свои обращения своих пользователей.\n\n"
-                                          "Список переданных вам пользователей:")
+                                "Список переданных вам пользователей:")
 
     for user_id in user_ids_to_remove:
         await bot.send_message(chat_id=user_id,
@@ -61,7 +69,7 @@ async def confirm_shutdown(callback : CallbackQuery,
         print(f"[DEBUG] Состояние пользователя {user_id} : {await storage.get_state(key=target_key)}")
 
     print(f"[DEBUG_EM] Список юзеров админа, получившего юзеров: "
-              f"{admin_db_manager.admin_texting_user_id_operation(free_admin_id)}")
+          f"{admin_db_manager.admin_texting_user_id_operation(free_admin_id)}")
 
 @router.callback_query(F.data == "CANCEL_EM_SHUTDOWN")
 async def cancel_shutdown(callback : CallbackQuery):

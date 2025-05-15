@@ -10,8 +10,8 @@ from Handlers.admin_work_status_handler import router as admin_change_work_readi
 from Handlers.emergency_shutdown_handler import router as emergency_shutdown_handler_router
 from Handlers.received_user_handler import router as show_user_history_handler_router
 
-TOKEN = config_manager.get_config('BOT_CONSTANTS', 'TOKEN')
 
+TOKEN = config_manager.get_config('BOT_CONSTANTS', 'TOKEN')
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
@@ -29,5 +29,5 @@ async def main():
 if __name__ == '__main__':
     try:
         run(main())
-    except KeyboardInterrupt:
-        print("Ошибка клавиатуры. Ничего страшного!")
+
+    except KeyboardInterrupt: pass

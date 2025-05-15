@@ -1,5 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
+
 class Menu:
     def __init__(self, menu_buttons : dict):
         self.menu_buttons = menu_buttons

@@ -8,6 +8,7 @@ from Menu. menu_pages_changer import (decrease_current_menu_page,
                                       increase_current_menu_page,
                                       get_current_menu_page)
 
+
 menu_buttons = config_manager.get_config("HELP_MENU_SETTINGS", "buttons")
 router = Router()
 
