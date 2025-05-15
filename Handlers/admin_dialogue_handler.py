@@ -110,7 +110,7 @@ async def remove_dialogue_history(callback : CallbackQuery,
     await callback.message.delete()
 
 @router.callback_query(F.data.startswith("CLOSE_DIALOGUE"))
-async def close_dialogue(callback : CallbackQuery ,
+async def close_dialogue(callback : CallbackQuery,
                          bot : Bot,
                          state : FSMContext):
 
