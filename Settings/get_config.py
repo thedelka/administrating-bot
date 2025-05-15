@@ -1,4 +1,6 @@
-"""Get config.txt info to use it anywhere"""
+"""
+Get config.txt info to use it anywhere
+Get admins"""
 from typing import Optional
 import configparser
 import os
@@ -18,7 +20,7 @@ class ConfigManager:
 
 
     def get_admins_list(self) -> list[Admin]:
-        """Usable only for reading, not writing"""
+        """Returns Admin-objects list for reading"""
         admins_list = [Admin(admin_info[0], admin_info[1]) for admin_info in self.get_config("ADMIN", 'admins')]
         return admins_list
 

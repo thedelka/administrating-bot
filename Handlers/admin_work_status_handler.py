@@ -28,8 +28,6 @@ async def change_admin_work_status(message: types.Message):
     await message.answer(text=work_status_text,
                          reply_markup=get_work_status_kb(admin_db_manager.get_admin_is_ready(admin_id)))
 
-    print(f"[DEBUG] Состояние админа: {admin_db_manager.get_admin_is_ready(admin_id)}")
-
 async def send_warning_message(message : types.Message):
     await message.answer("❗Вы пытаетесь взять паузу, но у вас еще есть "
                          "незавершённые диалоги с пользователями❗\n\n"

@@ -26,4 +26,4 @@ no_not_taken_admins_text_user = "❗Приносим свои извинения
 no_free_admins_for_receiving = "❌Сейчас нет свободных админов для перенаправления!\nПопробуйте позже"
 
 [ADMIN]
-admins = [ [1484777735, "thedelka"], [7650890499, "dianaSiyanova"]]
+admins = [ [1484777735, "thedelka"]]

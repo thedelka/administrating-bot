@@ -105,4 +105,3 @@ class AdminDatabaseManager:
 
 admin_db_manager = AdminDatabaseManager()
 _fill_admin_db()
-print(admin_db_manager.get_db())

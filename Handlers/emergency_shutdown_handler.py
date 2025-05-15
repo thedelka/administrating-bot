@@ -28,8 +28,7 @@ async def confirm_shutdown(callback : CallbackQuery,
     admin_db_manager.change_admin_is_ready(admin_id)
 
     user_ids_to_remove = admin_db_manager.admin_texting_user_id_operation(admin_id)
-    print(f"[DEBUG_EM] Список юзеров админа, "
-          f"нажавшего на кнопку, для удаления: {user_ids_to_remove}")
+
 
     await callback.message.answer(
         "✅Экстренное перенаправление пользователей подтверждено. "
@@ -41,13 +40,9 @@ async def confirm_shutdown(callback : CallbackQuery,
 
     await callback.message.delete()
 
-
     admin_db_manager.clear_admin_texting_user_id(admin_id)
 
-    print(f"[DEBUG_EM] Список юзеров админа, нажавшего на кнопку, после удаления: "
-          f"{admin_db_manager.admin_texting_user_id_operation(admin_id)}")
-
-    await bot.send_message(chat_id=free_admin_id,
+    await bot.send_message(chat_id=free_admin,
                            text=f"❗Оператор {admin_id} совершил экстренное отключение"
                                 f" и передал вам свои обращения своих пользователей.\n\n"
                                 "Список переданных вам пользователей:")
@@ -56,9 +51,9 @@ async def confirm_shutdown(callback : CallbackQuery,
         await bot.send_message(chat_id=user_id,
                                text=config_manager.get_config("MESSAGES", "change_operator_text"))
 
-        admin_db_manager.admin_texting_user_id_operation(free_admin_id,
+        admin_db_manager.admin_texting_user_id_operation(free_admin,
                                                          user_id)
-        await bot.send_message(chat_id=free_admin_id,
+        await bot.send_message(chat_id=free_admin,
                                text=f"{user_id} - @{user_db_manager.get_username(user_id)}",
                                reply_markup=get_show_messages_kb(user_id))
 
@@ -66,10 +61,6 @@ async def confirm_shutdown(callback : CallbackQuery,
         target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
         await storage.set_state(key=target_key, state=None)
 
-        print(f"[DEBUG] Состояние пользователя {user_id} : {await storage.get_state(key=target_key)}")
-
-    print(f"[DEBUG_EM] Список юзеров админа, получившего юзеров: "
-          f"{admin_db_manager.admin_texting_user_id_operation(free_admin_id)}")
 
 @router.callback_query(F.data == "CANCEL_EM_SHUTDOWN")
 async def cancel_shutdown(callback : CallbackQuery):

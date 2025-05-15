@@ -39,8 +39,6 @@ async def remove_user_id(user_id,
     target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
     await storage.set_state(key=target_key, state=None)
 
-    print(f"[DEBUG_DB_REMOVE_USER_ID] {admin_db_manager.get_db()}")
-
 @router.callback_query(F.data.startswith("ANSWER"))
 async def start_messaging(callback : CallbackQuery,
                           state : FSMContext,
@@ -53,7 +51,6 @@ async def start_messaging(callback : CallbackQuery,
 
     await state.set_state(AdminState.texting)
     await state.set_data({"current_user_id" : user_id})
-    print(f"[DEBUG_DB_ANSWER] {admin_db_manager.get_db()}")
 
 @router.message(StateFilter(AdminState.texting),
                 ~F.text.in_(["Готов к работе", "Взять паузу"]))
@@ -91,14 +88,17 @@ async def get_dialogue_history(callback : CallbackQuery,
 
     await callback.message.answer(f"⏫ИСТОРИЯ СООБЩЕНИЙ ПОЛЬЗОВАТЕЛЯ {user_id}⏫",
                                   reply_markup=create_clean_history_keyboard(user_id).as_markup())
-    await state.set_data({"temp_mess_history": archive_messages})
+    data = await state.get_data()
+    data[f"temp_mess_history_{user_id}"] = archive_messages
+    await state.set_data(data)
 
 @router.callback_query(F.data.startswith("REMOVE_HISTORY"))
 async def remove_dialogue_history(callback : CallbackQuery,
                                   state : FSMContext,
                                   bot : Bot):
+    user_id = callback.data.split("_")[-1]
     data = await state.get_data()
-    archive_messages = data.get("temp_mess_history", [])
+    archive_messages = data.get(f"temp_mess_history_{user_id}", [])
     admin_chat_id = callback.message.chat.id
 
     if archive_messages:
