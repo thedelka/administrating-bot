@@ -20,22 +20,24 @@ async def remove_user_id(user_id,
                          bot : Bot):
     user_id = int(user_id)
 
-    if user_id in admin_db_manager.admin_texting_user_id_operation(admin_id):
-        admin_db_manager.admin_texting_user_id_operation(admin_id, user_id, True)
+    if user_id not in admin_db_manager.admin_texting_user_id_operation(admin_id):
+        await callback.answer("Чат с пользователем и так завершён!")
+        return
 
-        await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
-        await state.clear()
+    admin_db_manager.admin_texting_user_id_operation(admin_id, user_id, True)
 
-        storage = state.storage
-        target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
-        await storage.set_state(key=target_key, state=None)
+    close_dialogue_text = config_manager.get_config(
+        "MESSAGES",
+        "close_dialogue_text"
+    )
+    await bot.send_message(user_id, close_dialogue_text)
 
-        print("[DEBUG] Состояние пользователя:"
-              f" {await storage.get_state(key=target_key)}")
+    await callback.message.answer(f"Чат с пользователем {user_id} завершён!")
+    await state.clear()
 
-    else:
-        print("[DEBUG] Такого юзера и так не было,"
-              " нечего удалять из списка.")
+    storage = state.storage
+    target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
+    await storage.set_state(key=target_key, state=None)
 
     print(f"[DEBUG_DB_REMOVE_USER_ID] {admin_db_manager.get_db()}")
 
@@ -115,12 +117,6 @@ async def close_dialogue(callback : CallbackQuery ,
     user_id = callback.data.split("_")[-1]
     admin_id = callback.from_user.id
 
-    close_dialogue_text = config_manager.get_config(
-        "MESSAGES",
-        "close_dialogue_text"
-    )
-
-    await bot.send_message(user_id, close_dialogue_text)
     user_db_manager.clear_user_message_history(user_id)
 
     await remove_user_id(user_id, admin_id, callback, state, bot)
