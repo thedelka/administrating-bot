@@ -42,7 +42,6 @@ class ConfigManager:
 
         min_queries_admins = [admin for admin in available_admins if admin[3] == min_queries]
 
-        print(f"[DEBUG] Админ с минимальным кол-вом юзеров: {min_queries_admins[0][0]}")
         return min_queries_admins[0][0]
 
 config_manager = ConfigManager()

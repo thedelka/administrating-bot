@@ -34,11 +34,6 @@ async def send_mess(message: Message,
                                          bot,
                                          serialize_message(message),
                                          user_id)
-    print(f"[DEBUG] Сообщения пользователя: "
-          f"{user_db_manager.get_user_messages(user_id)}")
-    print(f"[DEBUG_DB_SEND_TYPE_MESSAGE] "
-          f"{admin_db_manager.get_db()}")
-
 
 @router.message(StateFilter(None),
                 F.from_user.id.not_in(config_manager.get_admins_ids_list()))
@@ -60,10 +55,6 @@ async def send_user_message(message : Message,
                     lowest_queries_admin_id)
     await message.answer(
             "Ваше сообщение успешно отправлено. Пожалуйста, подождите, пока мы найдем свободных операторов...")
-
-
-    print(f'[DEBUG] Текущее состояние диалога у юзера: {await state.get_state()}')
-
 
 @router.message(StateFilter(DialogueState.dialogue_open),
                 F.from_user.id.not_in(config_manager.get_admins_ids_list()))
