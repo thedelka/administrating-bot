@@ -31,5 +31,3 @@ async def send_warning_message(message : types.Message):
                          "Если вы нажмете \"✅Подтвердить\", "
                          "все ваши обращения пользователей будут переведены на другого оператора❗",
                          reply_markup=em_shut_kb_builder.as_markup())
-
-
