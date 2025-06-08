@@ -1,8 +1,8 @@
 from aiogram import F, Router, Bot
 from aiogram.types import CallbackQuery
-from Database.users_data_db import user_db_manager
-from Keyboards.received_user_keyboard import get_user_operation_kb
-from Handlers.commands_handler import send_message_according_to_type
+from database.users_data_db import user_db_manager
+from keyboards.received_user_keyboard import get_user_operation_kb
+from handlers.commands_handler import send_message_according_to_type
 
 
 router = Router()

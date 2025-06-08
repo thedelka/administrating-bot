@@ -5,7 +5,7 @@ from typing import Optional
 import configparser
 import os
 import json
-from BotEntities.admin import Admin
+from bot_entities.admin import Admin
 
 
 class ConfigManager:

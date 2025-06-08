@@ -1,12 +1,12 @@
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import Router, Bot
-from Keyboards.menu_keyboard import menu_pages_builders
-from Keyboards.admin_work_status_keyboard import get_work_status_kb
-from Settings.get_config import config_manager
-from Database.users_data_db import user_db_manager
-from Database.admins_data_db import admin_db_manager
-from BotEntities.user import User
+from keyboards.menu_keyboard import menu_pages_builders
+from keyboards.admin_work_status_keyboard import get_work_status_kb
+from settings.get_config import config_manager
+from database.users_data_db import user_db_manager
+from database.admins_data_db import admin_db_manager
+from bot_entities.user import User
 
 
 router = Router()
@@ -33,7 +33,7 @@ async def send_message_according_to_type(target_id,
                                          bot : Bot,
                                          message_data : dict,
                                          user_id =  None):
-    """Check type of message and SEND MESSAGE ACCORDING TO its TYPE"""
+    """Checks type of message and SENDS MESSAGE ACCORDING TO its TYPE"""
 
     types_dict = {
         "text": lambda b, a_i: (b.send_message(a_i, message_data["text"])),

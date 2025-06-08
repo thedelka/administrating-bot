@@ -1,8 +1,8 @@
 import os
 import json
-import sqlite3
+from sqlite3 import connect
 from aiogram.types import Message
-from BotEntities.user import User
+from bot_entities.user import User
 
 
 def serialize_message(new_message : Message) -> dict:
@@ -29,7 +29,7 @@ class UserDatabaseManager:
 
     def __init__(self, db_name : str = "users_data.db"):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
-        self.connection = sqlite3.connect(self.db_path)
+        self.connection = connect(self.db_path)
         self.cursor = self.connection.cursor()
         self._create_table()
 

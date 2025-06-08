@@ -1,10 +1,10 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram import Router, F
-from Keyboards.menu_keyboard import menu_buttons_texts
-from Keyboards.menu_keyboard import menu_pages_builders
-from Settings.get_config import config_manager
-from Menu. menu_pages_changer import (decrease_current_menu_page,
+from keyboards.menu_keyboard import menu_buttons_texts
+from keyboards.menu_keyboard import menu_pages_builders
+from settings.get_config import config_manager
+from menu. menu_pages_changer import (decrease_current_menu_page,
                                       increase_current_menu_page,
                                       get_current_menu_page)
 

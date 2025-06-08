@@ -1,4 +1,4 @@
-from Keyboards.menu_keyboard import menu_pages_builders
+from keyboards.menu_keyboard import menu_pages_builders
 
 
 max_menu_pages = len(menu_pages_builders)

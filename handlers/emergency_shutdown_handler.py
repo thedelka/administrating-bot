@@ -3,11 +3,11 @@ from aiogram import F, Router, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import CallbackQuery
-from Settings.get_config import config_manager
-from Database.admins_data_db import admin_db_manager
-from Database.users_data_db import user_db_manager
-from Keyboards.admin_work_status_keyboard import get_work_status_kb
-from Keyboards.received_user_keyboard import get_show_messages_kb
+from settings.get_config import config_manager
+from database.admins_data_db import admin_db_manager
+from database.users_data_db import user_db_manager
+from keyboards.admin_work_status_keyboard import get_work_status_kb
+from keyboards.received_user_keyboard import get_show_messages_kb
 
 
 router = Router()
@@ -57,7 +57,7 @@ async def confirm_shutdown(callback : CallbackQuery,
                                text=f"{user_id} - @{user_db_manager.get_username(user_id)}",
                                reply_markup=get_show_messages_kb(user_id))
 
-        storage = state.storage #Ставим состояние юзеров на None, чтобы их след. сообщение отправилось полноценно, с клавой и тд
+        storage = state.storage
         target_key = StorageKey(chat_id=user_id, user_id=user_id, bot_id=bot.id)
         await storage.set_state(key=target_key, state=None)
 

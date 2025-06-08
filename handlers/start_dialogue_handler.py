@@ -4,12 +4,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.filters import StateFilter
 from aiogram import Router, Bot, F
-from Settings.get_config import config_manager
-from Database.users_data_db import  user_db_manager, serialize_message
-from Database.admins_data_db import admin_db_manager
-from States.dialogue_state import DialogueState
-from Keyboards.user_message_keyboard import create_user_message_keyboard
-from Handlers.commands_handler import send_message_according_to_type
+from settings.get_config import config_manager
+from database.users_data_db import  user_db_manager, serialize_message
+from database.admins_data_db import admin_db_manager
+from states.dialogue_state import DialogueState
+from keyboards.user_message_keyboard import create_user_message_keyboard
+from handlers.commands_handler import send_message_according_to_type
 
 
 router = Router()

@@ -1,8 +1,8 @@
 import json
 import os
-import sqlite3
-from BotEntities.admin import Admin
-from Settings.get_config import config_manager
+from sqlite3 import connect
+from bot_entities.admin import Admin
+from settings.get_config import config_manager
 
 
 def _fill_admin_db(admins_list=config_manager.get_admins_list()):
@@ -22,7 +22,7 @@ class AdminDatabaseManager:
 
     def __init__(self, db_name : str = "admins_data.db"):
         self.db_path = os.path.join(os.path.dirname(__file__), db_name)
-        self.connection = sqlite3.connect(self.db_path)
+        self.connection = connect(self.db_path)
         self.cursor = self.connection.cursor()
         self._create_table()
 
