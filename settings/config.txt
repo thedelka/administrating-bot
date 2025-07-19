@@ -1,5 +1,5 @@
 [BOT_CONSTANTS]
-TOKEN = "7392859299:AAErU7cLLIySDip7T1ql0SvNl5Ckajb71jo"
+TOKEN = ""
 timezone = "Europe/Moscow"
 
 [HELP_MENU_SETTINGS]
